@@ -1,23 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 
+import Path_Findering_Visualizer from './path_finding/path_finding_visualizer';
+
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Path_Findering_Visualizer></Path_Findering_Visualizer>
     </div>
   );
 }
