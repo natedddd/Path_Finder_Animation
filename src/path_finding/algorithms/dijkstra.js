@@ -1,4 +1,0 @@
-
-const dijkstra(startNode, finishNode) {
-
-}
