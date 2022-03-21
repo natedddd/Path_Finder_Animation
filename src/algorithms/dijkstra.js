@@ -47,6 +47,8 @@ function updateUnvisitedNeighbors(currentNode, grid) {
     const neighbors = getUnvisitedNeighbors(currentNode, grid);
 
     for (const neighbor of neighbors) {
+        // if (neighbor.previousNode != null) break;
+
         neighbor.distance = currentNode.distance + 1;
         neighbor.previousNode = currentNode;
     }
@@ -66,16 +68,27 @@ function getUnvisitedNeighbors(currentNode, grid) {
 }
 
 export function getNodesInShortestPathOrder(finishNode) {
+    // console.log("in shortest node");
     const shortestPathNodes = [];
     let currentNode = finishNode;
-
+    let ii = 0;
     while (currentNode != null) {
+        // console.log("while loop");
+        // console.log(currentNode);
+        // console.log("currentn node previous is: ");
+        // console.log(currentNode.previousNode);
         shortestPathNodes.unshift(currentNode);
         currentNode = currentNode.previousNode;
+        // if (ii === 100) {
+        //     console.log("ERROR");
+        //     break;
+        // }
+        // ii++;
     }
+    console.log("out of while");
     // case where the only node in the path is the end node
     // no path was found
     if (shortestPathNodes.length === 1) return []; 
-
+    console.log("at return");
     return shortestPathNodes;
 }

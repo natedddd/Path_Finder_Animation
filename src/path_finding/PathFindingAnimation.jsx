@@ -4,10 +4,10 @@ import { getNodesInShortestPathOrder, dijkstra } from "../algorithms/dijkstra";
 
 import './PathFindingAnimation.css'
 
-const START_NODE_ROW = 10;
-const START_NODE_COL = 10;
-const FINISH_NODE_ROW = 19;
-const FINISH_NODE_COL = 40;
+const START_NODE_ROW = 1;
+const START_NODE_COL = 1;
+const FINISH_NODE_ROW = 18;
+const FINISH_NODE_COL = 48;
 const NUM_OF_ROWS = 20;
 const NUM_OF_COLS = 50;
 
@@ -73,18 +73,21 @@ export default class PathFindingAnimation extends Component {
         this.animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
     }
     
+    handleClearVisitedNodes() {
+        const {grid} = this.state;
+        const startNode = grid[START_NODE_ROW][START_NODE_COL];
+        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        const visitedNodes = dijkstra(grid, startNode, finishNode);
+        const newGrid = clearVisitedNodes(grid, visitedNodes);
+        this.setState({grid: newGrid});
+    }
     
-    clearVisitedNodes() {
-        const {newGrid} = this.state;
-    
-        for (const row in newGrid) {
-            for (const node in row) {
-                if (node.isVisited === true) {
-                    node.isVisited = false;
-                    node.nodeType = "";
-                }
-            }
-        }
+    handleClearAllNodes() {
+        const {grid} = this.state;
+        const startNode = grid[START_NODE_ROW][START_NODE_COL];
+        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        const visitedNodes = dijkstra(grid, startNode, finishNode);
+        const newGrid = clearAllNodes(grid, visitedNodes);
         this.setState({grid: newGrid});
     }
 
@@ -96,8 +99,11 @@ export default class PathFindingAnimation extends Component {
                 <button onClick={() => this.visualizeDijkstra()}>
                     Visualize!
                 </button>
-                <button onClick={() => this.clearVisitedNodes()}>
-                    Clear Visited Notes
+                <button onClick={() => this.handleClearVisitedNodes()}>
+                    Clear Visited Nodes
+                </button>
+                <button onClick={() => this.handleClearAllNodes()}>
+                    Clear All
                 </button>
                 <div className="grid">
                     {grid.map((row, rowIdx) => {
@@ -156,8 +162,8 @@ const createInitialGrid = () => {
 };
 
 const getNewGridWithWallToggled = (grid, row, col) => {
-    if (row === START_NODE_ROW && col === START_NODE_COL ||
-        row === FINISH_NODE_ROW && col === FINISH_NODE_COL)  {return grid;}
+    if ( (row === START_NODE_ROW && col === START_NODE_COL) ||
+         (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) )  {return grid;}
 
     const newGrid = grid.slice();
     const tempNode = grid[row][col];
@@ -169,4 +175,38 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     newGrid[row][col] = newNode;
 
     return newGrid;
+}
+
+const clearVisitedNodes = (grid, visitedNodes) => {
+    for (const row of grid) {
+        for (const node of row) {
+            const isWall = (node.nodeType === "wall-node");
+            node.isVisited = false;
+            node.distance = Infinity;
+            node.previousNode = null;
+            node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
+                            : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
+                            : "";
+            if (isWall) node.nodeType = "wall-node";
+            document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
+        }
+
+    }
+    return grid;
+}
+
+const clearAllNodes = (grid, visitedNodes) => {
+    for (const row of grid) {
+        for (const node of row) {
+            node.isVisited = false;
+            node.distance = Infinity;
+            node.previousNode = null;
+            node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
+                            : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
+                            : "";
+            document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
+        }
+
+    }
+    return grid;
 }
