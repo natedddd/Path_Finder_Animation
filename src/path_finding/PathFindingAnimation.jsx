@@ -4,11 +4,11 @@ import { getNodesInShortestPathOrder, dijkstra } from "../algorithms/dijkstra";
 
 import './PathFindingAnimation.css'
 
-const START_NODE_ROW = 1;
-const START_NODE_COL = 1;
-const FINISH_NODE_ROW = 18;
-const FINISH_NODE_COL = 48;
-const NUM_OF_ROWS = 20;
+let START_NODE_ROW = 10;
+let START_NODE_COL = 10;
+let FINISH_NODE_ROW = 10;
+let FINISH_NODE_COL = 40;
+const NUM_OF_ROWS = 21;
 const NUM_OF_COLS = 50;
 
 export default class PathFindingAnimation extends Component {
@@ -17,6 +17,8 @@ export default class PathFindingAnimation extends Component {
         this.state = {
             grid: [],
             mouseIsPressed: false,
+            isMovingStart: false,
+            isMovingFinish: false,
         };
     }
 
@@ -26,18 +28,29 @@ export default class PathFindingAnimation extends Component {
     }
 
     handleMouseDown(row, col) {
+        let {movingStart, movingFinish} = this.state;
+        if (row === START_NODE_ROW && col === START_NODE_COL) movingStart = true;
+        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) movingFinish = true;
+        
         const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
-        this.setState({grid: newGrid, mouseIsPressed: true});
+        this.setState({grid: newGrid, mouseIsPressed: true, isMovingStart: movingStart, isMovingFinish: movingFinish});
     }
-
+    
     handleMouseEnter(row, col) {
         if (!this.state.mouseIsPressed) return;
-        const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+
+        let {isMovingStart, isMovingFinish} = this.state;
+        let newGrid;
+        if (isMovingStart || isMovingFinish) {
+            newGrid = getNewGridWithMovingStartOrEndNode(this.state.grid, row, col, isMovingStart);
+        } else {
+            newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+        }
         this.setState({grid: newGrid});
     }
 
     handleMouseUp() {
-        this.setState({mouseIsPressed: false})
+        this.setState({mouseIsPressed: false, isMovingStart: false, isMovingFinish:false})
     }
 
     animateAlgorithm(visitedNodes, nodesInShortestPathOrder) {
@@ -75,20 +88,14 @@ export default class PathFindingAnimation extends Component {
     
     handleClearVisitedNodes() {
         const {grid} = this.state;
-        const startNode = grid[START_NODE_ROW][START_NODE_COL];
-        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-        const visitedNodes = dijkstra(grid, startNode, finishNode);
-        const newGrid = clearVisitedNodes(grid, visitedNodes);
-        this.setState({grid: newGrid});
+        clearVisitedNodes(grid);
+        this.setState({grid: grid});
     }
     
     handleClearAllNodes() {
         const {grid} = this.state;
-        const startNode = grid[START_NODE_ROW][START_NODE_COL];
-        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-        const visitedNodes = dijkstra(grid, startNode, finishNode);
-        const newGrid = clearAllNodes(grid, visitedNodes);
-        this.setState({grid: newGrid});
+        clearAllNodes(grid);
+        this.setState({grid: grid});
     }
 
     render() {
@@ -143,7 +150,7 @@ const createNode = (row, col) => {
                 : "",
         distance: Infinity,
         isVisited: false,
-        // isWall: false,
+        isWall: false,
         previousNode: null,
     };
 };
@@ -173,11 +180,27 @@ const getNewGridWithWallToggled = (grid, row, col) => {
         nodeType: tempNode.nodeType === "wall-node" ? "" : "wall-node",
     };
     newGrid[row][col] = newNode;
-
+    
     return newGrid;
 }
 
-const clearVisitedNodes = (grid, visitedNodes) => {
+const getNewGridWithMovingStartOrEndNode = (grid, row, col, isMovingStart) => {
+    let newGrid = grid.slice();
+    const tempNode = grid[row][col];
+    let newNode = tempNode;
+    
+    if (isMovingStart) {
+        newNode.nodeType = tempNode.nodeType === "start-node" ? "" : "start-node";
+        updateStartNode(newGrid, row, col);
+    } else {
+        newNode.nodeType = tempNode.nodeType === "finish-node" ? "" : "finish-node";
+        updateFinishNode(newGrid, row, col);
+    }
+    newGrid[row][col] = newNode;
+    return newGrid;
+}
+
+function clearVisitedNodes(grid) {
     for (const row of grid) {
         for (const node of row) {
             const isWall = (node.nodeType === "wall-node");
@@ -185,28 +208,42 @@ const clearVisitedNodes = (grid, visitedNodes) => {
             node.distance = Infinity;
             node.previousNode = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
-                            : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
-                            : "";
+                          : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
+                          : "";
             if (isWall) node.nodeType = "wall-node";
             document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
         }
-
     }
-    return grid;
 }
 
-const clearAllNodes = (grid, visitedNodes) => {
+function clearAllNodes(grid) {
     for (const row of grid) {
         for (const node of row) {
             node.isVisited = false;
             node.distance = Infinity;
             node.previousNode = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
-                            : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
-                            : "";
+                          : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
+                          : "";
             document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
         }
-
     }
+}
+
+function updateStartNode(grid, row, col) {
+    let node = grid[START_NODE_ROW][START_NODE_COL];
+    node.nodeType = "";
+    grid[START_NODE_ROW][START_NODE_COL] = node;
+    START_NODE_ROW = row;
+    START_NODE_COL = col;
+    return grid;
+}
+
+function updateFinishNode(grid, row, col) {
+    let node = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+    node.nodeType = "";
+    grid[FINISH_NODE_ROW][FINISH_NODE_COL] = node;
+    FINISH_NODE_ROW = row;
+    FINISH_NODE_COL = col;
     return grid;
 }
