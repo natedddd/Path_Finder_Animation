@@ -8,7 +8,6 @@ export default class Node extends Component {
             row,
             col,
             nodeType,
-            // isWall,
             onMouseDown,
             onMouseEnter,
             onMouseUp,

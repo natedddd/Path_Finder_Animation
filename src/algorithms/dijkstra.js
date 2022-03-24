@@ -1,6 +1,13 @@
-
-
-export function dijkstra(grid, startNode, finishNode) {
+/**
+ * Performs Dijkstra's algorithm to find the shortest
+ * path from a Start to Finish node
+ * 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object} startNode The grid's Start node
+ * @param {Object} finishNode The grid's Finish node
+ * @returns {Object[]<Node>} All visited nodes in order
+ */
+export function performDijkstra(grid, startNode, finishNode) {
     const visitedNodes = [];
     const unvisitedNodes = getAllNodes(grid);
 
@@ -11,6 +18,7 @@ export function dijkstra(grid, startNode, finishNode) {
         sortNodesByDistance(unvisitedNodes);
         const closestNode = unvisitedNodes.shift();
         
+        // if the closest node is a wall, skip visiting it
         if (closestNode.nodeType === "wall-node") continue;
 
         // condition where no path is possible
@@ -25,9 +33,14 @@ export function dijkstra(grid, startNode, finishNode) {
     return visitedNodes;
 }
 
+/**
+ * Returns all of the nodes in the grid
+ * 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @returns {Object[]<Node>} All nodes in the grid
+ */
 function getAllNodes(grid) {
     const allNodes = [];
-
     for (const row of grid) {
         for (const node of row) {
             allNodes.push(node);
@@ -36,11 +49,22 @@ function getAllNodes(grid) {
     return allNodes;
 }
 
-
+/**
+ * Sorts the unvisited nodes in increasing distance from the start node
+ * 
+ * @param {Object[]<Node>} unvisitedNodes All unvisited nodes in the grid
+ */
 function sortNodesByDistance(unvisitedNodes) {
     unvisitedNodes.sort((nodeA, nodeB) => nodeA.distance - nodeB.distance);
 }
 
+/**
+ * Increases the unvisited neighbor's 'distance' by 1 beacuse
+ * it is one node farther away fromt the start node
+ * 
+ * @param {Object<Node>} currentNode Node that was just visited
+ * @param {Object[][]<Node>} grid The current grid state
+ */
 function updateUnvisitedNeighbors(currentNode, grid) {
     const neighbors = getUnvisitedNeighbors(currentNode, grid);
 
@@ -50,7 +74,13 @@ function updateUnvisitedNeighbors(currentNode, grid) {
     }
 }
 
-
+/**
+ * Returns all unvisited neighbors of currentNode
+ * 
+ * @param {Object<Node>} currentNode Node that was just visited 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @returns {Object[]<Node>} All unvisited neighbors of currentNode
+ */
 function getUnvisitedNeighbors(currentNode, grid) {
     const neighbors = []; 
     const {row, col} = currentNode;
@@ -63,6 +93,12 @@ function getUnvisitedNeighbors(currentNode, grid) {
     return neighbors.filter(neighbor => !neighbor.isVisited);
 }
 
+/**
+ * 
+ * @param {Object<Node>} finishNode The grid's Finish node 
+ * @returns {Object[]<Node>} The nodes that make the shortest path returned
+ *                           in order from Start to Finish Node
+ */
 export function getNodesInShortestPathOrder(finishNode) {
     const shortestPathNodes = [];
     let currentNode = finishNode;
