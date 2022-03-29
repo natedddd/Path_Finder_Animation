@@ -27,6 +27,7 @@
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
     animation-play-state: running;
+    z-index: -5;
   }
   
 @keyframes visitedAnimation {

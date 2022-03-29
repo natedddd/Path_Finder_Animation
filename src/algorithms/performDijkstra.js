@@ -94,6 +94,7 @@ function getUnvisitedNeighbors(currentNode, grid) {
 }
 
 /**
+ * Returns node in the shortest path order from Start to Finish
  * 
  * @param {Object<Node>} finishNode The grid's Finish node 
  * @returns {Object[]<Node>} The nodes that make the shortest path returned

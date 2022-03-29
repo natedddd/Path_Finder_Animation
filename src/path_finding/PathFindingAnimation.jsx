@@ -172,6 +172,19 @@ export default class PathFindingAnimation extends Component {
         this.state.isReadyToAnimate = true;
     }
 
+    // handleSelectAlgo() {
+    //     document.getElementById("algoDropdown").classList.toggle("updateDropdownName");
+    // }
+
+    updateDropdownName(algorithmName) {
+        document.querySelector('#algoDropdown').textContent = algorithmName;
+    }
+
+    toggleDropdown() {
+        let dropdown = document.querySelector('.dropdown');
+        dropdown.classList.toggle('active')
+    }
+
     /**
      * Renders the HTML and the grid used for the path finding animation
      * Initializes event handlers 
@@ -179,16 +192,37 @@ export default class PathFindingAnimation extends Component {
     render() {
         const {grid, mouseIsPressed} = this.state;
         return (
-            <>
-                <button onClick={() => this.visualizeDijkstra()}>
-                    Visualize!
-                </button>
-                <button onClick={() => this.handleClearVisitedNodes()}>
-                    Clear Visited Nodes
-                </button>
-                <button onClick={() => this.handleClearAllNodes()}>
-                    Clear All
-                </button>
+            <>  
+                <div className="header">
+                    <div className="navbar">
+                        <div className="title">Path finding Visualizer</div>
+                        <div className="dropdown" onClick={() => this.toggleDropdown()}>
+                            <button className="button" id="algoDropdown">
+                                Select Algorithm
+                            </button>
+                            
+                            <div className="option">
+                                <div onClick={() => this.updateDropdownName("Dijkstra's Algorithm")}>Dijkstra's Algorithm</div>
+                                <div onClick={() => this.updateDropdownName("A* Algorithm")}>A* Algorithm</div>
+                            </div>
+                        </div>
+                        <div className="navButton">
+                            <button className="button" onClick={() => this.visualizeDijkstra()}>
+                                Visualize!
+                            </button>
+                        </div>
+                        <div className="navButton" >
+                            <button className="button" onClick={() => this.handleClearVisitedNodes()}>
+                                Clear Visited Nodes
+                            </button>
+                        </div>
+                        <div className="navButton">
+                            <button className="button" onClick={() => this.handleClearAllNodes()}>
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+            </div>
                 <div className="grid">
                     {grid.map((row, rowIdx) => {
                         return (
@@ -216,6 +250,10 @@ export default class PathFindingAnimation extends Component {
         );
     }
 }
+// let dropdown = document.quertySelector('.dropdown');
+//                     dropdown.onclick = function() {
+//                         this.dropdown.classList.toggle('active');
+//                     }
 
 /**
  * Creates a node
