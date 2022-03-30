@@ -4,12 +4,12 @@ import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/perf
 
 import './PathFindingAnimation.css'
 
-let START_NODE_ROW = 10;
+let START_NODE_ROW = 12;
 let START_NODE_COL = 10;
-let FINISH_NODE_ROW = 10;
-let FINISH_NODE_COL = 40;
-const NUM_OF_ROWS = 21;
-const NUM_OF_COLS = 50;
+let FINISH_NODE_ROW = 12;
+let FINISH_NODE_COL = 50;
+const NUM_OF_ROWS = 25;
+const NUM_OF_COLS = 60;
 
 /**
  * Creates the object used to provide the grid and visualize the 
@@ -30,6 +30,8 @@ export default class PathFindingAnimation extends Component {
             isMovingFinish: false,
             isAnimating: false,
             isReadyToAnimate: true,
+            selectedAlgo: "dijkstra",
+            animationSpeed: "normal",
         };
     }
 
@@ -132,6 +134,24 @@ export default class PathFindingAnimation extends Component {
     }
 
     /**
+     * Calls the appropriate algorithm to visualize depending
+     * on the 'selectedAlgo' state
+     */
+    visualizeAlgorithm() {
+        const curAlgo = this.state.selectedAlgo;
+        switch (curAlgo) {
+            case "dijkstra":
+                this.visualizeDijkstra();
+                break;
+            case "a*":
+                console.log("a*");
+                break;
+            default:
+                console.log("Error visualizing algorithms. No valid algorithm select");
+        }
+    }
+
+    /**
      * Calls the necessary functions to perform 
      * and visualize Dijkstra's algorithm
      */
@@ -140,6 +160,7 @@ export default class PathFindingAnimation extends Component {
             this.handleClearVisitedNodes();
             this.visualizeDijkstra();
         }
+        this.hideDropdown();
         this.state.isAnimating = true;
         this.state.isReadyToAnimate = false;
         const {grid} = this.state;
@@ -155,6 +176,7 @@ export default class PathFindingAnimation extends Component {
      */
     handleClearVisitedNodes() {
         if (this.state.isAnimating) return;
+        this.hideDropdown();
         const {grid} = this.state;
         clearVisitedNodes(grid);
         this.setState({grid: grid});
@@ -166,22 +188,85 @@ export default class PathFindingAnimation extends Component {
      */
     handleClearAllNodes() {
         if (this.state.isAnimating) return;
+        this.hideDropdown();
         const {grid} = this.state;
         clearAllNodes(grid);
         this.setState({grid: grid});
         this.state.isReadyToAnimate = true;
     }
 
-    // handleSelectAlgo() {
-    //     document.getElementById("algoDropdown").classList.toggle("updateDropdownName");
-    // }
+    /**
+     * Updates the algorithm dropdown button with the selected algorithm 
+     * and updates the appropriate react state
+     * 
+     * @param {String} algorithmName The algorithm that was just selected by the user
+     */
+    updateAlgoDropdownName(algorithmName) {
+        document.querySelector('#algoDropdownBtn').textContent = algorithmName;
 
-    updateDropdownName(algorithmName) {
-        document.querySelector('#algoDropdown').textContent = algorithmName;
+        if (algorithmName === "Dijkstra's Algorithm") {
+            algorithmName = "dijkstra";
+        } else {
+            algorithmName = "a*";
+        }
+        this.setState({selectedAlgo: algorithmName})
     }
 
-    toggleDropdown() {
-        let dropdown = document.querySelector('.dropdown');
+    /**
+     * Updates the maze dropdown button with the selected maze 
+     * and updates the appropriate react state
+     * 
+     * @param {String} mazeName The algorithm that was just selected by the user
+     */
+     updateMazeDropdownName(mazeName) {
+        document.querySelector('#mazeDropdownBtn').textContent = mazeName;
+
+        // if (algorithmName === "Maze 1") {
+        //     algorithmName = "maze1";
+        // } else {
+        //     algorithmName = "maze2";
+        // }
+        // this.setState({selectedAlgo: algorithmName})
+    }
+
+    /**
+     * Updates the speed dropdown button with the selected speed 
+     * and updates the appropriate react state
+     * 
+     * @param {String} animationSpeed The algorithm that was just selected by the user
+     */
+     updateSpeedDropdownName(animationSpeed) {
+        document.querySelector('#speedDropdownBtn').textContent = `Speed: ${animationSpeed}`;
+
+        if (animationSpeed === "Slow") {
+            animationSpeed = "slow";
+        } else if (animationSpeed === "Normal") {
+            animationSpeed = "normal";
+        } else {
+            animationSpeed = "fast";
+        }
+        this.setState({animationSpeed: animationSpeed})
+    }
+
+    /**
+     * Hides all dropdown menus
+     */
+    hideDropdown() {
+        let dropdown = document.querySelector('.dropdown.active');
+        while (dropdown != null) {
+            dropdown.classList.remove('active');
+            dropdown = document.querySelector('.dropdown.active');
+        }
+    }
+
+    /**
+     * Sets the algorithm dropdown menu button to be hidden or unhidden
+     * 
+     * @param {String} dropdownName The dropdown that the user just clicked
+     */
+    toggleDropdown(dropdownName) {
+        const className = `#${dropdownName}`;
+        const dropdown = document.querySelector(className);
         dropdown.classList.toggle('active')
     }
 
@@ -195,19 +280,27 @@ export default class PathFindingAnimation extends Component {
             <>  
                 <div className="header">
                     <div className="navbar">
-                        <div className="title">Path finding Visualizer</div>
-                        <div className="dropdown" onClick={() => this.toggleDropdown()}>
-                            <button className="button" id="algoDropdown">
-                                Select Algorithm
+                        <div className="title">Pathfinding Visualizer</div>
+                        <div className="dropdown" id="algoDropdownDiv" onClick={() => this.toggleDropdown("algoDropdownDiv")}>
+                            <button className="button" id="algoDropdownBtn">
+                                Dijkstra's Algorithm
                             </button>
-                            
-                            <div className="option">
-                                <div onClick={() => this.updateDropdownName("Dijkstra's Algorithm")}>Dijkstra's Algorithm</div>
-                                <div onClick={() => this.updateDropdownName("A* Algorithm")}>A* Algorithm</div>
+                            <div className="option" id="algoOptions">
+                                <div onClick={() => this.updateAlgoDropdownName("Dijkstra's Algorithm")}>Dijkstra's Algorithm</div>
+                                <div onClick={() => this.updateAlgoDropdownName("A* Algorithm")}>A* Algorithm</div>
+                            </div>
+                        </div>
+                        <div className="dropdown" id="mazeDropdownDiv" onClick={() => this.toggleDropdown("mazeDropdownDiv")}>
+                            <button className="button" id="mazeDropdownBtn">
+                                Maze Options
+                            </button>
+                            <div className="option" id="mazeOptions">
+                                <div onClick={() => this.updateMazeDropdownName("Maze 1")}>Maze 1</div>
+                                <div onClick={() => this.updateMazeDropdownName("Maze 2")}>Maze 2</div>
                             </div>
                         </div>
                         <div className="navButton">
-                            <button className="button" onClick={() => this.visualizeDijkstra()}>
+                            <button className="button" id="visualizebtn" onClick={() => this.visualizeAlgorithm()}>
                                 Visualize!
                             </button>
                         </div>
@@ -220,6 +313,16 @@ export default class PathFindingAnimation extends Component {
                             <button className="button" onClick={() => this.handleClearAllNodes()}>
                                 Clear All
                             </button>
+                        </div>
+                        <div className="dropdown" id="speedDropdownDiv" onClick={() => this.toggleDropdown("speedDropdownDiv")}>
+                            <button className="button" id="speedDropdownBtn">
+                                Speed: Normal
+                            </button>
+                            <div className="option" id="speedOptions">
+                                <div onClick={() => this.updateSpeedDropdownName("Slow")}>Slow</div>
+                                <div onClick={() => this.updateSpeedDropdownName("Normal")}>Normal</div>
+                                <div onClick={() => this.updateSpeedDropdownName("Fast")}>Fast</div>
+                            </div>
                         </div>
                     </div>
             </div>
@@ -250,10 +353,6 @@ export default class PathFindingAnimation extends Component {
         );
     }
 }
-// let dropdown = document.quertySelector('.dropdown');
-//                     dropdown.onclick = function() {
-//                         this.dropdown.classList.toggle('active');
-//                     }
 
 /**
  * Creates a node
