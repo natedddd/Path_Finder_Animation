@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import Node from './Node'
 import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/performDijkstra";
+import performAStar from "../algorithms/performAStar";
 
 import './PathFindingAnimation.css'
 
@@ -10,7 +11,11 @@ let FINISH_NODE_ROW = 12;
 let FINISH_NODE_COL = 50;
 const NUM_OF_ROWS = 25;
 const NUM_OF_COLS = 60;
-
+const ANIMATE_DEFAULT_ALGO_SPEED = 10;
+const ANIMATE_PATH_SPEED = 25;
+const SLOW_SPD = 15;
+const NORMAL_SPD = 1;
+const FAST_SPD = 0.4;
 /**
  * Creates the object used to provide the grid and visualize the 
  * execution of the selected algorithms. Also handles website controls
@@ -30,8 +35,8 @@ export default class PathFindingAnimation extends Component {
             isMovingFinish: false,
             isAnimating: false,
             isReadyToAnimate: true,
-            selectedAlgo: "dijkstra",
-            animationSpeed: "normal",
+            currentAlgo: "dijkstra",
+            animationSpeed: NORMAL_SPD,
         };
     }
 
@@ -101,20 +106,22 @@ export default class PathFindingAnimation extends Component {
      *                                                  from Start to Finish node
      */
     animateAlgorithm(visitedNodes, nodesInShortestPathOrder) {
+        const {animationSpeed} = this.state;
         for (let ii = 0; ii <= visitedNodes.length; ii++) {
             if (ii === visitedNodes.length) {
                 setTimeout(() => {
                     this.animateShortestPath(nodesInShortestPathOrder);
-                }, 10 * ii);
+                }, ANIMATE_DEFAULT_ALGO_SPEED * animationSpeed * ii);
             } else {
                 setTimeout(() => {
                     const node = visitedNodes[ii];
                     document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited';
-                }, 10 * ii);
+                    document.getElementById(`node-${node.row}-${node.col}`).style.setProperty('--animationSpd',animationSpeed);
+                }, ANIMATE_DEFAULT_ALGO_SPEED * animationSpeed * ii);
             }
         }
     }
-
+    
     /**
      * Animates the shortest path from Start to Finish node
      * 
@@ -122,52 +129,51 @@ export default class PathFindingAnimation extends Component {
      *                                                  from Start to Finish node
      */
     animateShortestPath(nodesInShortestPathOrder) {
+        const {animationSpeed} = this.state;
         for (let ii = 0; ii < nodesInShortestPathOrder.length; ii++) {
             setTimeout(() => {
                 const node = nodesInShortestPathOrder[ii];
                 document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path';
-            }, 25 * ii);
+            }, ANIMATE_PATH_SPEED * animationSpeed * ii);
         }
         setTimeout(() => {
             this.state.isAnimating = false;
-        }, 25*nodesInShortestPathOrder.length);
+        }, ANIMATE_PATH_SPEED * animationSpeed * nodesInShortestPathOrder.length);
     }
 
     /**
      * Calls the appropriate algorithm to visualize depending
-     * on the 'selectedAlgo' state
+     * on the 'currentAlgo' state
      */
     visualizeAlgorithm() {
-        const curAlgo = this.state.selectedAlgo;
-        switch (curAlgo) {
-            case "dijkstra":
-                this.visualizeDijkstra();
-                break;
-            case "a*":
-                console.log("a*");
-                break;
-            default:
-                console.log("Error visualizing algorithms. No valid algorithm select");
-        }
-    }
-
-    /**
-     * Calls the necessary functions to perform 
-     * and visualize Dijkstra's algorithm
-     */
-    visualizeDijkstra() {
         if (!this.state.isReadyToAnimate) {
             this.handleClearVisitedNodes();
-            this.visualizeDijkstra();
+            this.visualizeAlgorithm();
         }
         this.hideDropdown();
+        const curAlgo = this.state.currentAlgo;
         this.state.isAnimating = true;
         this.state.isReadyToAnimate = false;
         const {grid} = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-        const visitedNodes = performDijkstra(grid, startNode, finishNode);
-        const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+        let visitedNodes;
+        let nodesInShortestPathOrder;
+        
+        switch (curAlgo) {
+            case "dijkstra":
+                visitedNodes = performDijkstra(grid, startNode, finishNode);
+                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+                break;
+            case "a*":
+                console.log("a*");
+                visitedNodes = performAStar(grid, startNode, finishNode);
+                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+                break;
+            default:
+                console.log("Error visualizing algorithms. No valid algorithm select");
+                break;
+        }
         this.animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
     }
     
@@ -179,8 +185,9 @@ export default class PathFindingAnimation extends Component {
         this.hideDropdown();
         const {grid} = this.state;
         clearVisitedNodes(grid);
-        this.setState({grid: grid});
-        this.state.isReadyToAnimate = true;
+        this.setState({grid: grid, isReadyToAnimate: true});
+        // this.state.isReadyToAnimate = true;
+
     }
     
     /**
@@ -209,7 +216,8 @@ export default class PathFindingAnimation extends Component {
         } else {
             algorithmName = "a*";
         }
-        this.setState({selectedAlgo: algorithmName})
+        // this.handleClearVisitedNodes();
+        this.setState({currentAlgo: algorithmName})
     }
 
     /**
@@ -226,7 +234,7 @@ export default class PathFindingAnimation extends Component {
         // } else {
         //     algorithmName = "maze2";
         // }
-        // this.setState({selectedAlgo: algorithmName})
+        // this.setState({currentAlgo: algorithmName})
     }
 
     /**
@@ -239,11 +247,11 @@ export default class PathFindingAnimation extends Component {
         document.querySelector('#speedDropdownBtn').textContent = `Speed: ${animationSpeed}`;
 
         if (animationSpeed === "Slow") {
-            animationSpeed = "slow";
+            animationSpeed = SLOW_SPD;
         } else if (animationSpeed === "Normal") {
-            animationSpeed = "normal";
+            animationSpeed = NORMAL_SPD;
         } else {
-            animationSpeed = "fast";
+            animationSpeed = FAST_SPD;
         }
         this.setState({animationSpeed: animationSpeed})
     }
@@ -325,29 +333,35 @@ export default class PathFindingAnimation extends Component {
                             </div>
                         </div>
                     </div>
-            </div>
-                <div className="grid">
-                    {grid.map((row, rowIdx) => {
-                        return (
-                            <div key={rowIdx}>
-                                {row.map((node, nodeIdx) => {
-                                    const {row, col, nodeType} = node;
-                                    return (
-                                        <Node
-                                            key={nodeIdx}
-                                            row = {row}
-                                            col = {col}
-                                            nodeType = {nodeType}
-                                            mouseIsPressed = {mouseIsPressed}
-                                            onMouseDown = {(row,col) => this.handleMouseDown(row,col)}
-                                            onMouseEnter = {(row,col) => this.handleMouseEnter(row,col)}
-                                            onMouseUp = {() => this.handleMouseUp()}
-                                        ></Node>
-                                    );
-                                })}
-                            </div>
-                        );
-                    })}
+                </div> {/* header */}
+                <div className="body"> 
+                    <div>
+                        Visited Nodes
+                        Shortest Path Count
+                    </div>
+                    <div className="grid">
+                        {grid.map((row, rowIdx) => {
+                            return (
+                                <div key={rowIdx}>
+                                    {row.map((node, nodeIdx) => {
+                                        const {row, col, nodeType} = node;
+                                        return (
+                                            <Node
+                                                key={nodeIdx}
+                                                row = {row}
+                                                col = {col}
+                                                nodeType = {nodeType}
+                                                mouseIsPressed = {mouseIsPressed}
+                                                onMouseDown = {(row,col) => this.handleMouseDown(row,col)}
+                                                onMouseEnter = {(row,col) => this.handleMouseEnter(row,col)}
+                                                onMouseUp = {() => this.handleMouseUp()}
+                                            ></Node>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </>
         );
@@ -369,6 +383,7 @@ const createNode = (row, col) => {
                 : (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) ? "finish-node" 
                 : "",
         distance: Infinity,
+        heuristicDistance: Infinity,
         isVisited: false,
         previousNode: null,
     };
@@ -456,6 +471,7 @@ function clearVisitedNodes(grid) {
             const curNodeIsWall = (node.nodeType === "wall-node");
             node.isVisited = false;
             node.distance = Infinity;
+            node.heuristicDistance = Infinity;
             node.previousNode = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
                           : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 

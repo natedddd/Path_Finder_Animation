@@ -1,6 +1,10 @@
+:root {
+    --animationSpd: 1;
+}
+
 .node {
-    width: 1.5vw;
-    height: 1.5vw;
+    width: 1.3vw;
+    height: 1.3vw;
     outline: 1px solid grey;
     display: inline-block;
     background-color: white;
@@ -20,7 +24,7 @@
 
 .node-visited {
     animation-name: visitedAnimation;
-    animation-duration: 1.5s;
+    animation-duration: calc(1.5s * var(--animationSpd));
     animation-timing-function: ease-out;
     animation-delay: 0;
     animation-direction: alternate;
@@ -60,7 +64,7 @@
   
 .node-shortest-path {
     animation-name: shortestPathAnimation;
-    animation-duration: 1s;
+    animation-duration: calc(1s * var(--animationSpd));
     animation-timing-function: ease-out;
     animation-delay: 0;
     animation-direction: alternate;
