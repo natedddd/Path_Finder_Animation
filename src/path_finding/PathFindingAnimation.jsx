@@ -1,7 +1,9 @@
 import React, { Component } from "react"
-import Node from './Node'
+import Node from './node/Node'
 import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/performDijkstra";
 import performAStar from "../algorithms/performAStar";
+import getSnakeMaze from "../mazes/snakeMaze";
+import getRandomMaze from "../mazes/randomMaze";
 
 import './PathFindingAnimation.css'
 
@@ -11,8 +13,9 @@ let FINISH_NODE_ROW = 12;
 let FINISH_NODE_COL = 50;
 const NUM_OF_ROWS = 25;
 const NUM_OF_COLS = 60;
-const ANIMATE_DEFAULT_ALGO_SPEED = 10;
-const ANIMATE_PATH_SPEED = 25;
+const ANIMATE_DEFAULT_ALGO_SPD = 10;
+const ANIMATE_PATH_SPD = 25;
+const ANIMATE_WALL_SPD = 8;
 const SLOW_SPD = 15;
 const NORMAL_SPD = 1;
 const FAST_SPD = 0.4;
@@ -33,10 +36,10 @@ export default class PathFindingAnimation extends Component {
             mouseIsPressed: false,
             isMovingStart: false,
             isMovingFinish: false,
-            isAnimating: false,
+            // isReadyToAnimate: false,
             isReadyToAnimate: true,
             currentAlgo: "dijkstra",
-            animationSpeed: NORMAL_SPD,
+            animationSpeed: FAST_SPD,
         };
     }
 
@@ -57,7 +60,7 @@ export default class PathFindingAnimation extends Component {
      * @param {number} col The col of the node that is currently clicked
      */
     handleMouseDown(row, col) {
-        if (this.state.isAnimating) return;
+        if (!this.state.isReadyToAnimate) return;
         
         let {movingStart, movingFinish} = this.state;
         if (row === START_NODE_ROW && col === START_NODE_COL) movingStart = true;
@@ -111,13 +114,13 @@ export default class PathFindingAnimation extends Component {
             if (ii === visitedNodes.length) {
                 setTimeout(() => {
                     this.animateShortestPath(nodesInShortestPathOrder);
-                }, ANIMATE_DEFAULT_ALGO_SPEED * animationSpeed * ii);
+                }, ANIMATE_DEFAULT_ALGO_SPD * animationSpeed * ii);
             } else {
                 setTimeout(() => {
                     const node = visitedNodes[ii];
                     document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited';
                     document.getElementById(`node-${node.row}-${node.col}`).style.setProperty('--animationSpd',animationSpeed);
-                }, ANIMATE_DEFAULT_ALGO_SPEED * animationSpeed * ii);
+                }, ANIMATE_DEFAULT_ALGO_SPD * animationSpeed * ii);
             }
         }
     }
@@ -134,11 +137,12 @@ export default class PathFindingAnimation extends Component {
             setTimeout(() => {
                 const node = nodesInShortestPathOrder[ii];
                 document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path';
-            }, ANIMATE_PATH_SPEED * animationSpeed * ii);
+            }, ANIMATE_PATH_SPD * animationSpeed * ii);
         }
         setTimeout(() => {
-            this.state.isAnimating = false;
-        }, ANIMATE_PATH_SPEED * animationSpeed * nodesInShortestPathOrder.length);
+            this.state.isReadyToAnimate = true;
+            console.log("ready to animate");
+        }, ANIMATE_PATH_SPD * animationSpeed * nodesInShortestPathOrder.length);
     }
 
     /**
@@ -146,21 +150,17 @@ export default class PathFindingAnimation extends Component {
      * on the 'currentAlgo' state
      */
     visualizeAlgorithm() {
-        if (!this.state.isReadyToAnimate) {
-            this.handleClearVisitedNodes();
-            this.visualizeAlgorithm();
-        }
+        if (!this.state.isReadyToAnimate) return;
+        this.handleClearVisitedNodes();
         this.hideDropdown();
-        const curAlgo = this.state.currentAlgo;
-        this.state.isAnimating = true;
-        this.state.isReadyToAnimate = false;
-        const {grid} = this.state;
+        this.setState({isReadyToAnimate: false});
+        const {grid, currentAlgo} = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
         let visitedNodes;
         let nodesInShortestPathOrder;
         
-        switch (curAlgo) {
+        switch (currentAlgo) {
             case "dijkstra":
                 visitedNodes = performDijkstra(grid, startNode, finishNode);
                 nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
@@ -181,25 +181,21 @@ export default class PathFindingAnimation extends Component {
      * Clears only the visited nodes 
      */
     handleClearVisitedNodes() {
-        if (this.state.isAnimating) return;
+        if (!this.state.isReadyToAnimate) return;
         this.hideDropdown();
         const {grid} = this.state;
         clearVisitedNodes(grid);
         this.setState({grid: grid, isReadyToAnimate: true});
-        // this.state.isReadyToAnimate = true;
-
     }
     
     /**
      * Clears all visited and wall nodes
      */
     handleClearAllNodes() {
-        if (this.state.isAnimating) return;
-        this.hideDropdown();
+        if (!this.state.isReadyToAnimate) return;
         const {grid} = this.state;
         clearAllNodes(grid);
-        this.setState({grid: grid});
-        this.state.isReadyToAnimate = true;
+        this.setState({grid: grid, isReadyToAnimate: true});
     }
 
     /**
@@ -216,8 +212,7 @@ export default class PathFindingAnimation extends Component {
         } else {
             algorithmName = "a*";
         }
-        // this.handleClearVisitedNodes();
-        this.setState({currentAlgo: algorithmName})
+        this.setState({currentAlgo: algorithmName});
     }
 
     /**
@@ -229,12 +224,25 @@ export default class PathFindingAnimation extends Component {
      updateMazeDropdownName(mazeName) {
         document.querySelector('#mazeDropdownBtn').textContent = mazeName;
 
-        // if (algorithmName === "Maze 1") {
-        //     algorithmName = "maze1";
-        // } else {
-        //     algorithmName = "maze2";
-        // }
-        // this.setState({currentAlgo: algorithmName})
+        let grid = this.state.grid;
+        let mazeWalls = [];
+        const startNode = grid[START_NODE_ROW][START_NODE_COL];
+        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        if (mazeName === "Snake Maze") {
+            this.handleClearAllNodes();
+            mazeWalls = getSnakeMaze(grid, startNode, finishNode);
+        } else {
+            this.handleClearAllNodes();
+            mazeWalls = getRandomMaze(grid, startNode, finishNode);
+        }
+        for (let ii = 0; ii < mazeWalls.length; ii++) {
+            setTimeout(() => {
+                const node = mazeWalls[ii];
+                document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
+                grid[node.row][node.col].nodeType = "wall-node-maze";
+            }, ANIMATE_WALL_SPD * ii);
+        }
+        this.setState({grid: grid});
     }
 
     /**
@@ -283,6 +291,7 @@ export default class PathFindingAnimation extends Component {
      * Initializes event handlers 
      */
     render() {
+        console.log("rendering");
         const {grid, mouseIsPressed} = this.state;
         return (
             <>  
@@ -303,8 +312,8 @@ export default class PathFindingAnimation extends Component {
                                 Maze Options
                             </button>
                             <div className="option" id="mazeOptions">
-                                <div onClick={() => this.updateMazeDropdownName("Maze 1")}>Maze 1</div>
-                                <div onClick={() => this.updateMazeDropdownName("Maze 2")}>Maze 2</div>
+                                <div onClick={() => this.updateMazeDropdownName("Snake Maze")}>Snake Maze</div>
+                                <div onClick={() => this.updateMazeDropdownName("Random Maze")}>Random Maze</div>
                             </div>
                         </div>
                         <div className="navButton">
@@ -324,7 +333,7 @@ export default class PathFindingAnimation extends Component {
                         </div>
                         <div className="dropdown" id="speedDropdownDiv" onClick={() => this.toggleDropdown("speedDropdownDiv")}>
                             <button className="button" id="speedDropdownBtn">
-                                Speed: Normal
+                                Speed: Fast
                             </button>
                             <div className="option" id="speedOptions">
                                 <div onClick={() => this.updateSpeedDropdownName("Slow")}>Slow</div>
@@ -335,8 +344,10 @@ export default class PathFindingAnimation extends Component {
                     </div>
                 </div> {/* header */}
                 <div className="body"> 
-                    <div>
-                        Visited Nodes
+                    <div className="counterDiv" id="visitedCount">
+                        Visited Nodes Count
+                    </div>
+                    <div className="counterDiv" id="pathCounter">
                         Shortest Path Count
                     </div>
                     <div className="grid">
@@ -422,10 +433,10 @@ const getNewGridWithWallToggled = (grid, row, col) => {
 
     const newGrid = grid.slice();
     const tempNode = grid[row][col];
-
     const newNode = {
         ...tempNode,
-        nodeType: tempNode.nodeType === "wall-node" ? "" : "wall-node",
+        nodeType: (tempNode.nodeType === "wall-node-maze" || 
+                   tempNode.nodeType === "wall-node") ? "" : "wall-node",
     };
     newGrid[row][col] = newNode;
     
@@ -443,20 +454,22 @@ const getNewGridWithWallToggled = (grid, row, col) => {
  * @returns The new grid with the new Start or Finish node
  */
 const getNewGridWithMovingStartOrEndNode = (grid, row, col, isMovingStart) => {
+    if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return newGrid;
     let newGrid = grid.slice();
     const tempNode = grid[row][col];
-    let newNode = tempNode;
+
+    const nodeIsWall = (tempNode.nodeType === "wall-node" || 
+                        tempNode.nodeType === "wall-node-maze");
+    if (nodeIsWall) return newGrid;
     
     if (isMovingStart) {
-        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return newGrid;
-        newNode.nodeType = tempNode.nodeType === "start-node" ? "" : "start-node";
+        tempNode.nodeType = tempNode.nodeType === "start-node" ? "" : "start-node";
         updateStartNodePosition(newGrid, row, col);
     } else {
-        if (row === START_NODE_ROW && col === START_NODE_COL) return newGrid;
-        newNode.nodeType = tempNode.nodeType === "finish-node" ? "" : "finish-node";
+        tempNode.nodeType = tempNode.nodeType === "finish-node" ? "" : "finish-node";
         updateFinishNodePosition(newGrid, row, col);
     }
-    newGrid[row][col] = newNode;
+    newGrid[row][col] = tempNode;
     return newGrid;
 }
 
@@ -468,7 +481,8 @@ const getNewGridWithMovingStartOrEndNode = (grid, row, col, isMovingStart) => {
 function clearVisitedNodes(grid) {
     for (const row of grid) {
         for (const node of row) {
-            const curNodeIsWall = (node.nodeType === "wall-node");
+            const nodeIsWall = (node.nodeType === "wall-node" || 
+                                node.nodeType === "wall-node-maze");
             node.isVisited = false;
             node.distance = Infinity;
             node.heuristicDistance = Infinity;
@@ -476,7 +490,7 @@ function clearVisitedNodes(grid) {
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
                           : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
                           : "";
-            if (curNodeIsWall) node.nodeType = "wall-node";
+            if (nodeIsWall) node.nodeType = "wall-node";
             document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
         }
     }

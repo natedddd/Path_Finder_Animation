@@ -20,7 +20,8 @@ export function performDijkstra(grid, startNode, finishNode) {
         // console.log("Closest node is: ")
         
         // if the closest node is a wall, skip visiting it
-        if (closestNode.nodeType === "wall-node") continue;
+        if (closestNode.nodeType === "wall-node" || 
+            closestNode.nodeType === "wall-node-maze") continue;
 
         // condition where no path is possible
         if (closestNode.distance === Infinity) return visitedNodes;

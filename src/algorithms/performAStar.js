@@ -9,9 +9,10 @@ export default function performAStar(grid, startNode, finishNode) {
     while (unvisitedNodes.length != 0) {
         sortNodesByDistance(unvisitedNodes, finishNode);
         const closestNode = unvisitedNodes.shift();
-        console.log(closestNode.heuristicDistance);
-
-        if (closestNode.nodeType === "wall-node") continue;
+        
+        // if the closest node is a wall, skip visiting it
+        if (closestNode.nodeType === "wall-node" || 
+            closestNode.nodeType === "wall-node-maze") continue;
 
         // case where there is no possible path from Start to Finish
         if (closestNode.distance === Infinity) return visitedNodes;

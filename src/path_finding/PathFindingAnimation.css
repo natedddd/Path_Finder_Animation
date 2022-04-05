@@ -134,8 +134,30 @@
     color: white
 }
 
+.body {
+    display: flexbox;
+
+}
+
+.counterDiv {
+    color: var(--navbar-color);
+    background-color: red;
+    width: 15vw;
+    height: 3vw;
+    border-radius: 10px;
+    margin: 5px;
+    font-weight: bold;
+    font-size: 1.2vw;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+
+
+    display: none;
+}
+
 .grid {
     position: absolute;
-    margin: 1vw 11vw;
+    margin: 0vw 11vw;
     z-index: -1;
 }
