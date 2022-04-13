@@ -4,6 +4,8 @@ import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/perf
 import performAStar from "../algorithms/performAStar";
 import getSnakeMaze from "../mazes/snakeMaze";
 import getRandomMaze from "../mazes/randomMaze";
+import getRecursiveBacktrackMaze from "../mazes/recursiveBacktrackMaze";
+import getRecursiveDivisionMaze from "../mazes/recursiveDivisionMaze";
 
 import './PathFindingAnimation.css'
 
@@ -11,11 +13,11 @@ let START_NODE_ROW = 12;
 let START_NODE_COL = 10;
 let FINISH_NODE_ROW = 12;
 let FINISH_NODE_COL = 50;
-const NUM_OF_ROWS = 25;
-const NUM_OF_COLS = 60;
+const NUM_OF_GRID_ROWS = 25;
+const NUM_OF_GRID_COLS = 59;
 const ANIMATE_DEFAULT_ALGO_SPD = 10;
 const ANIMATE_PATH_SPD = 25;
-const ANIMATE_WALL_SPD = 8;
+const ANIMATE_WALL_SPD = 10;
 const SLOW_SPD = 15;
 const NORMAL_SPD = 1;
 const FAST_SPD = 0.4;
@@ -224,23 +226,31 @@ export default class PathFindingAnimation extends Component {
      updateMazeDropdownName(mazeName) {
         document.querySelector('#mazeDropdownBtn').textContent = mazeName;
 
-        let grid = this.state.grid;
+        const {grid, animationSpeed} = this.state;
         let mazeWalls = [];
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-        if (mazeName === "Snake Maze") {
-            this.handleClearAllNodes();
+        this.handleClearAllNodes();
+
+        if (mazeName === "Snake Pattern") {
             mazeWalls = getSnakeMaze(grid, startNode, finishNode);
-        } else {
-            this.handleClearAllNodes();
+        } else if (mazeName === "Random Maze") {
             mazeWalls = getRandomMaze(grid, startNode, finishNode);
+        } else if (mazeName === "Recursive Backtrack") {
+            mazeWalls = getRecursiveBacktrackMaze(grid, startNode, finishNode);
+        } else {
+            mazeWalls = getRecursiveDivisionMaze(grid, startNode, finishNode);
+            console.log(mazeWalls);
+            console.log("walls length: " + mazeWalls.length);
         }
         for (let ii = 0; ii < mazeWalls.length; ii++) {
             setTimeout(() => {
                 const node = mazeWalls[ii];
+                if (node != startNode && node != finishNode) {
                 document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
                 grid[node.row][node.col].nodeType = "wall-node-maze";
-            }, ANIMATE_WALL_SPD * ii);
+                }
+            }, ANIMATE_WALL_SPD * animationSpeed * ii);
         }
         this.setState({grid: grid});
     }
@@ -312,8 +322,10 @@ export default class PathFindingAnimation extends Component {
                                 Maze Options
                             </button>
                             <div className="option" id="mazeOptions">
-                                <div onClick={() => this.updateMazeDropdownName("Snake Maze")}>Snake Maze</div>
+                                <div onClick={() => this.updateMazeDropdownName("Snake Pattern")}>Snake Pattern</div>
                                 <div onClick={() => this.updateMazeDropdownName("Random Maze")}>Random Maze</div>
+                                <div onClick={() => this.updateMazeDropdownName("Recursive Backtrack")}>Recursive Backtrack</div>
+                                <div onClick={() => this.updateMazeDropdownName("Recursive Division")}>Recursive Division</div>
                             </div>
                         </div>
                         <div className="navButton">
@@ -407,9 +419,9 @@ const createNode = (row, col) => {
  */
 const createInitialGrid = () => {
     const grid = [];
-    for (let row = 0; row < NUM_OF_ROWS; row++) {
+    for (let row = 0; row < NUM_OF_GRID_ROWS; row++) {
         const currentRow = [];
-        for (let col = 0; col < NUM_OF_COLS; col++) {
+        for (let col = 0; col < NUM_OF_GRID_COLS; col++) {
             currentRow.push(createNode(row,col));
         }
         grid.push(currentRow);

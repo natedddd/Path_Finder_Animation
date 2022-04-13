@@ -3,8 +3,8 @@
  * path from a Start to Finish node
  * 
  * @param {Object[][]<Node>} grid The current grid state
- * @param {Object} startNode The grid's Start node
- * @param {Object} finishNode The grid's Finish node
+ * @param {Object<Node>} startNode The grid's Start node
+ * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[]<Node>} All visited nodes in order
  */
 export function performDijkstra(grid, startNode, finishNode) {

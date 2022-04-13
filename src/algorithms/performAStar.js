@@ -1,3 +1,10 @@
+/**
+ * 
+ * @param {*} grid 
+ * @param {*} startNode 
+ * @param {*} finishNode 
+ * @returns 
+ */
 export default function performAStar(grid, startNode, finishNode) {
     const visitedNodes = [];
     const unvisitedNodes = getAllNodes(grid);
