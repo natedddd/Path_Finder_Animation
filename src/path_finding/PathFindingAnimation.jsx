@@ -2,6 +2,8 @@ import React, { Component } from "react"
 import Node from './node/Node'
 import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/performDijkstra";
 import performAStar from "../algorithms/performAStar";
+import performGreedy from "../algorithms/performGreedy";
+import performRecursiveSearch from "../algorithms/performRecursiveSearch";
 import getSnakeMaze from "../mazes/snakeMaze";
 import getRandomMaze from "../mazes/randomMaze";
 import getRecursiveBacktrackMaze from "../mazes/recursiveBacktrackMaze";
@@ -18,9 +20,9 @@ const NUM_OF_GRID_COLS = 59;
 const ANIMATE_DEFAULT_ALGO_SPD = 10;
 const ANIMATE_PATH_SPD = 25;
 const ANIMATE_WALL_SPD = 10;
-const SLOW_SPD = 15;
-const NORMAL_SPD = 1;
-const FAST_SPD = 0.4;
+const SLOW_SPD = 12;
+const NORMAL_SPD = 2;
+const FAST_SPD = 0.6;
 /**
  * Creates the object used to provide the grid and visualize the 
  * execution of the selected algorithms. Also handles website controls
@@ -38,7 +40,6 @@ export default class PathFindingAnimation extends Component {
             mouseIsPressed: false,
             isMovingStart: false,
             isMovingFinish: false,
-            // isReadyToAnimate: false,
             isReadyToAnimate: true,
             currentAlgo: "dijkstra",
             animationSpeed: FAST_SPD,
@@ -148,6 +149,33 @@ export default class PathFindingAnimation extends Component {
     }
 
     /**
+     * Animates in the walls of the selected maze
+     * 
+     * @param {Object[]<Node>} mazeWalls 
+     */
+    animateMazeWalls(mazeWalls) {
+        const {grid, animationSpeed} = this.state;
+        const startNode = grid[START_NODE_ROW][START_NODE_COL];
+        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        for (let ii = 0; ii < mazeWalls.length; ii++) {
+            grid[START_NODE_ROW][START_NODE_COL].nodeType = "start-node";
+            grid[FINISH_NODE_ROW][FINISH_NODE_COL].nodeType = "finish-node";
+            setTimeout(() => {
+                const node = mazeWalls[ii];
+                if (node != startNode && node != finishNode) {
+                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
+                    grid[node.row][node.col].nodeType = "wall-node-maze";
+                } 
+            }, ANIMATE_WALL_SPD * animationSpeed * ii);
+        }
+        setTimeout(() => {
+            this.setState({grid: grid, isReadyToAnimate: true});
+            this.state.isReadyToAnimate = true;
+            console.log("ready to animate");
+        }, ANIMATE_WALL_SPD * animationSpeed * mazeWalls.length);
+    }
+
+    /**
      * Calls the appropriate algorithm to visualize depending
      * on the 'currentAlgo' state
      */
@@ -168,8 +196,15 @@ export default class PathFindingAnimation extends Component {
                 nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
                 break;
             case "a*":
-                console.log("a*");
                 visitedNodes = performAStar(grid, startNode, finishNode);
+                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+                break;
+            case "greedy":
+                visitedNodes = performGreedy(grid, startNode, finishNode);
+                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+                break;
+            case "recursiveSearch":
+                visitedNodes = performRecursiveSearch(grid, startNode, finishNode);
                 nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
                 break;
             default:
@@ -211,8 +246,12 @@ export default class PathFindingAnimation extends Component {
 
         if (algorithmName === "Dijkstra's Algorithm") {
             algorithmName = "dijkstra";
-        } else {
+        } else if (algorithmName === "A* Search") {
             algorithmName = "a*";
+        } else if (algorithmName === "Greedy Best-First") {
+            algorithmName = "greedy";
+        } else {
+            algorithmName = "recursiveSearch";
         }
         this.setState({currentAlgo: algorithmName});
     }
@@ -224,35 +263,26 @@ export default class PathFindingAnimation extends Component {
      * @param {String} mazeName The algorithm that was just selected by the user
      */
      updateMazeDropdownName(mazeName) {
-        document.querySelector('#mazeDropdownBtn').textContent = mazeName;
-
+        if (!this.state.isReadyToAnimate) return;
+        
         const {grid, animationSpeed} = this.state;
-        let mazeWalls = [];
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
         this.handleClearAllNodes();
-
+        this.setState({isReadyToAnimate: false});
+        let mazeWalls = [];
+        
+        document.querySelector('#mazeDropdownBtn').textContent = mazeName;
         if (mazeName === "Snake Pattern") {
             mazeWalls = getSnakeMaze(grid, startNode, finishNode);
         } else if (mazeName === "Random Maze") {
             mazeWalls = getRandomMaze(grid, startNode, finishNode);
         } else if (mazeName === "Recursive Backtrack") {
-            mazeWalls = getRecursiveBacktrackMaze(grid, startNode, finishNode);
+            mazeWalls = getRecursiveBacktrackMaze(grid, startNode);
         } else {
-            mazeWalls = getRecursiveDivisionMaze(grid, startNode, finishNode);
-            console.log(mazeWalls);
-            console.log("walls length: " + mazeWalls.length);
+            mazeWalls = getRecursiveDivisionMaze(grid);
         }
-        for (let ii = 0; ii < mazeWalls.length; ii++) {
-            setTimeout(() => {
-                const node = mazeWalls[ii];
-                if (node != startNode && node != finishNode) {
-                document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
-                grid[node.row][node.col].nodeType = "wall-node-maze";
-                }
-            }, ANIMATE_WALL_SPD * animationSpeed * ii);
-        }
-        this.setState({grid: grid});
+        this.animateMazeWalls(mazeWalls);
     }
 
     /**
@@ -296,6 +326,7 @@ export default class PathFindingAnimation extends Component {
         dropdown.classList.toggle('active')
     }
 
+
     /**
      * Renders the HTML and the grid used for the path finding animation
      * Initializes event handlers 
@@ -314,7 +345,9 @@ export default class PathFindingAnimation extends Component {
                             </button>
                             <div className="option" id="algoOptions">
                                 <div onClick={() => this.updateAlgoDropdownName("Dijkstra's Algorithm")}>Dijkstra's Algorithm</div>
-                                <div onClick={() => this.updateAlgoDropdownName("A* Algorithm")}>A* Algorithm</div>
+                                <div onClick={() => this.updateAlgoDropdownName("A* Search")}>A* Search</div>
+                                <div onClick={() => this.updateAlgoDropdownName("Greedy Best-First")}>Greedy Best-First</div>
+                                <div onClick={() => this.updateAlgoDropdownName("Recursive Search")}>Recursive Search</div>
                             </div>
                         </div>
                         <div className="dropdown" id="mazeDropdownDiv" onClick={() => this.toggleDropdown("mazeDropdownDiv")}>

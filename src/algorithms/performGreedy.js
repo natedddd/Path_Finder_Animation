@@ -1,8 +1,6 @@
 /**
- * Performs A* search algorithm to find the shortest path from 
- * a Start to Finish node.
- * Uses a heurisitc of distance from node to augment which node
- * to visit next
+ * Performs Greedy search algorithm to find the local optimal
+ * move which may not be the global optimal
  * 
  * 
  * @param {Object[][]<Node>} grid The current grid state
@@ -10,11 +8,10 @@
  * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[]<Node>} All visited nodes in order
  */
-export default function performAStar(grid, startNode, finishNode) {
+ export default function performGreedy(grid, startNode, finishNode) {
     const visitedNodes = [];
     const unvisitedNodes = getAllNodes(grid);
 
-    startNode.distance = 0;
     startNode.heuristicDistance = getDistanceFromFinish(startNode, finishNode);
 
     while (unvisitedNodes.length != 0) {
@@ -26,7 +23,7 @@ export default function performAStar(grid, startNode, finishNode) {
             closestNode.nodeType === "wall-node-maze") continue;
 
         // condition where no path is possible
-        if (closestNode.distance === Infinity) return visitedNodes;
+        if (closestNode.heuristicDistance === Infinity) return visitedNodes;
 
         closestNode.isVisited = true;
         visitedNodes.push(closestNode);
@@ -103,8 +100,7 @@ function updateUnvisitedNeighbors(currentNode, finishNode, grid) {
     const neighbors = getUnvisitedNeighbors(currentNode, grid);
 
     for (const neighbor of neighbors) {
-        neighbor.distance = currentNode.distance + 1;
-        neighbor.heuristicDistance = neighbor.distance + getDistanceFromFinish(neighbor, finishNode);
+        neighbor.heuristicDistance = getDistanceFromFinish(neighbor, finishNode);
         neighbor.previousNode = currentNode;
     }
 }
