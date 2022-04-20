@@ -10,7 +10,6 @@
 export function performDijkstra(grid, startNode, finishNode) {
     const visitedNodes = [];
     const unvisitedNodes = getAllNodes(grid);
-
     startNode.distance = 0;
 
     while (unvisitedNodes.length > 0) {

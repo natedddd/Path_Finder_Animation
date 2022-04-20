@@ -5,7 +5,7 @@
 .node {
     width: 1.3vw;
     height: 1.3vw;
-    outline: 1px solid grey;
+    outline: 1px solid gray;
     display: inline-block;
     background-color: white;
 }
@@ -20,6 +20,10 @@
 
 .wall-node {
     background-color: rgb(12, 53, 71);
+}
+
+.node-visited-no-anim {
+    background-color: rgba(38, 179, 245, 0.75);
 }
 
 .node-visited {
@@ -60,7 +64,10 @@
         background-color: rgba(38, 179, 245, 0.75);
     }
 }
-  
+
+.node-shortest-path-no-anim {
+    background-color: yellow;
+}
   
 .node-shortest-path {
     animation-name: shortestPathAnimation;

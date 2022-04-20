@@ -11,10 +11,10 @@ import getRecursiveDivisionMaze from "../mazes/recursiveDivisionMaze";
 
 import './PathFindingAnimation.css'
 
-let START_NODE_ROW = 12;
-let START_NODE_COL = 10;
-let FINISH_NODE_ROW = 12;
-let FINISH_NODE_COL = 50;
+let START_NODE_ROW = 0; //12
+let START_NODE_COL = 0; //10
+let FINISH_NODE_ROW = 2; // 12
+let FINISH_NODE_COL = 5; // 50
 const NUM_OF_GRID_ROWS = 25;
 const NUM_OF_GRID_COLS = 59;
 const ANIMATE_DEFAULT_ALGO_SPD = 10;
@@ -41,6 +41,7 @@ export default class PathFindingAnimation extends Component {
             isMovingStart: false,
             isMovingFinish: false,
             isReadyToAnimate: true,
+            isVisualized: false,
             currentAlgo: "dijkstra",
             animationSpeed: FAST_SPD,
         };
@@ -87,7 +88,8 @@ export default class PathFindingAnimation extends Component {
         let {isMovingStart, isMovingFinish} = this.state;
         let newGrid;
         if (isMovingStart || isMovingFinish) {
-            newGrid = getNewGridWithMovingStartOrEndNode(this.state.grid, row, col, isMovingStart);
+            newGrid = this.getNewGridWithMovingStartOrEndNode(this.state.grid, row, col, isMovingStart);
+            if (this.state.isVisualized) this.visualizeAlgorithm();
         } else {
             newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
         }
@@ -100,14 +102,80 @@ export default class PathFindingAnimation extends Component {
     handleMouseUp() {
         this.setState({mouseIsPressed: false, isMovingStart: false, isMovingFinish:false})
     }
+    
+    /**
+     * Calls the appropriate algorithm to visualize depending
+     * on the 'currentAlgo' state
+     */
+    visualizeAlgorithm() {
+        if (!this.state.isReadyToAnimate) return;
+        this.handleClearVisitedNodes();
+        this.hideDropdown();
+        this.setState({isReadyToAnimate: false});
+        const {grid, currentAlgo, isVisualized} = this.state;
+        const startNode = grid[START_NODE_ROW][START_NODE_COL];
+        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        let visitedNodes;
+
+        switch (currentAlgo) {
+            case "dijkstra":
+                visitedNodes = performDijkstra(grid, startNode, finishNode);
+                break;
+            case "a*":
+                visitedNodes = performAStar(grid, startNode, finishNode);
+                break;
+            case "greedy":
+                visitedNodes = performGreedy(grid, startNode, finishNode);
+                break;
+            case "recursiveSearch":
+                visitedNodes = performRecursiveSearch(grid, startNode, finishNode);
+                break;
+            default:
+                console.log("Error visualizing algorithms. No valid algorithm select");
+                break;
+        }
+        const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+        if (isVisualized) {
+            this.visualizeAlgorithmNoAnimation(visitedNodes, nodesInShortestPathOrder);
+        } else {
+            this.animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
+        }
+
+        this.setState({isVisualized: true});
+    }
 
     /**
-     * Animates the nodes in the order they were visited during Dijkstra's
+     * Performs the same visualization as normal, but now there is
+     * no animation. The "shortest path" is instantly updated.
+     * Used when moving 'start' or 'finish' nodes after animating
+     * 
+     * @param {Object[]<Node>} visitedNodes Contains all visited nodes in the order
+     *                                      they were visited from the selected algorithm
+     * @param {Object[]<Node>} nodesInShortestPathOrder Contains the shortest path nodes
+     *                                                  from Start to Finish node
+     */
+    visualizeAlgorithmNoAnimation(visitedNodes, nodesInShortestPathOrder) {
+        for (let ii = 0; ii <= visitedNodes.length; ii++) {
+            if (ii === visitedNodes.length) {
+                for (let ii = 0; ii < nodesInShortestPathOrder.length; ii++) {
+                    const node = nodesInShortestPathOrder[ii];
+                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path-no-anim';
+                }
+            } else {
+                const node = visitedNodes[ii];
+                document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited-no-anim';
+            }
+        }
+        this.setState({isReadyToAnimate: true})
+    }
+
+    /**
+     * Animates the nodes in the order they were visited during the selected
      * algorithm. After reaching the last visited node, calls the function to 
      * animate the shortest path
      * 
      * @param {Object[]<Node>} visitedNodes Contains all visited nodes in the order
-     *                                      they were visited from Dijkstra's
+     *                                      they were visited from the selected algorithm
      * @param {Object[]<Node>} nodesInShortestPathOrder Contains the shortest path nodes
      *                                                  from Start to Finish node
      */
@@ -157,9 +225,10 @@ export default class PathFindingAnimation extends Component {
         const {grid, animationSpeed} = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        grid[START_NODE_ROW][START_NODE_COL].nodeType = "start-node";
+        grid[FINISH_NODE_ROW][FINISH_NODE_COL].nodeType = "finish-node";
+
         for (let ii = 0; ii < mazeWalls.length; ii++) {
-            grid[START_NODE_ROW][START_NODE_COL].nodeType = "start-node";
-            grid[FINISH_NODE_ROW][FINISH_NODE_COL].nodeType = "finish-node";
             setTimeout(() => {
                 const node = mazeWalls[ii];
                 if (node != startNode && node != finishNode) {
@@ -170,48 +239,7 @@ export default class PathFindingAnimation extends Component {
         }
         setTimeout(() => {
             this.setState({grid: grid, isReadyToAnimate: true});
-            this.state.isReadyToAnimate = true;
-            console.log("ready to animate");
         }, ANIMATE_WALL_SPD * animationSpeed * mazeWalls.length);
-    }
-
-    /**
-     * Calls the appropriate algorithm to visualize depending
-     * on the 'currentAlgo' state
-     */
-    visualizeAlgorithm() {
-        if (!this.state.isReadyToAnimate) return;
-        this.handleClearVisitedNodes();
-        this.hideDropdown();
-        this.setState({isReadyToAnimate: false});
-        const {grid, currentAlgo} = this.state;
-        const startNode = grid[START_NODE_ROW][START_NODE_COL];
-        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-        let visitedNodes;
-        let nodesInShortestPathOrder;
-        
-        switch (currentAlgo) {
-            case "dijkstra":
-                visitedNodes = performDijkstra(grid, startNode, finishNode);
-                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-                break;
-            case "a*":
-                visitedNodes = performAStar(grid, startNode, finishNode);
-                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-                break;
-            case "greedy":
-                visitedNodes = performGreedy(grid, startNode, finishNode);
-                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-                break;
-            case "recursiveSearch":
-                visitedNodes = performRecursiveSearch(grid, startNode, finishNode);
-                nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-                break;
-            default:
-                console.log("Error visualizing algorithms. No valid algorithm select");
-                break;
-        }
-        this.animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
     }
     
     /**
@@ -222,7 +250,7 @@ export default class PathFindingAnimation extends Component {
         this.hideDropdown();
         const {grid} = this.state;
         clearVisitedNodes(grid);
-        this.setState({grid: grid, isReadyToAnimate: true});
+        this.setState({grid: grid, isReadyToAnimate: true, isVisualized: false});
     }
     
     /**
@@ -232,7 +260,7 @@ export default class PathFindingAnimation extends Component {
         if (!this.state.isReadyToAnimate) return;
         const {grid} = this.state;
         clearAllNodes(grid);
-        this.setState({grid: grid, isReadyToAnimate: true});
+        this.setState({grid: grid, isReadyToAnimate: true, isVisualized: false});
     }
 
     /**
@@ -326,6 +354,43 @@ export default class PathFindingAnimation extends Component {
         dropdown.classList.toggle('active')
     }
 
+    /**
+     * Used to set the 'isVisualized' state to false when 
+     * 'Visualized' button is clicked by the user
+     */
+    handleVisualizeAlgorithm() {
+        this.state.isVisualized = false;
+        this.visualizeAlgorithm();
+    }
+
+    /**
+     * Returns a new grid after changing a node to either the new Start
+     * or Finish node, depending on the isMovingStart boolean
+     * 
+     * @param {Object[][]<Node>} grid The current grid state
+     * @param {number} row The row of the node that is currently being set
+     * @param {number} col The col of the node that is currently being set
+     * @param {Boolean} isMovingStart True iff the user is moving the start node
+     * @returns The new grid with the new Start or Finish node
+     */
+    getNewGridWithMovingStartOrEndNode(grid, row, col, isMovingStart) {
+        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return newGrid;
+        let newGrid = grid.slice();
+        const tempNode = grid[row][col];
+        const nodeIsWall = (tempNode.nodeType === "wall-node" || 
+                            tempNode.nodeType === "wall-node-maze");
+        if (nodeIsWall) return newGrid;
+        
+        if (isMovingStart) {
+            tempNode.nodeType = tempNode.nodeType === "start-node" ? "" : "start-node";
+            updateStartNodePosition(newGrid, row, col);
+        } else {
+            tempNode.nodeType = tempNode.nodeType === "finish-node" ? "" : "finish-node";
+            updateFinishNodePosition(newGrid, row, col);
+        }
+        newGrid[row][col] = tempNode;
+        return newGrid;
+    }
 
     /**
      * Renders the HTML and the grid used for the path finding animation
@@ -362,7 +427,7 @@ export default class PathFindingAnimation extends Component {
                             </div>
                         </div>
                         <div className="navButton">
-                            <button className="button" id="visualizebtn" onClick={() => this.visualizeAlgorithm()}>
+                            <button className="button" id="visualizebtn" onClick={() => this.handleVisualizeAlgorithm()}>
                                 Visualize!
                             </button>
                         </div>
@@ -389,11 +454,16 @@ export default class PathFindingAnimation extends Component {
                     </div>
                 </div> {/* header */}
                 <div className="body"> 
-                    <div className="counterDiv" id="visitedCount">
-                        Visited Nodes Count
+                    <div className="visualizerGuide">
+                        
                     </div>
-                    <div className="counterDiv" id="pathCounter">
-                        Shortest Path Count
+                    <div className="counterDiv">
+                        <div className="counter" id="visitedCount">
+                            Visited Nodes Count
+                        </div>
+                        <div className="counter" id="pathCounter">
+                            Shortest Path Count
+                        </div>
                     </div>
                     <div className="grid">
                         {grid.map((row, rowIdx) => {
@@ -488,35 +558,6 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     return newGrid;
 }
 
-/**
- * Returns a new grid after changing a node to either the new Start
- * or Finish node, depending on the isMovingStart boolean
- * 
- * @param {Object[][]<Node>} grid The current grid state
- * @param {number} row The row of the node that is currently being set
- * @param {number} col The col of the node that is currently being set
- * @param {Boolean} isMovingStart True iff the user is moving the start node
- * @returns The new grid with the new Start or Finish node
- */
-const getNewGridWithMovingStartOrEndNode = (grid, row, col, isMovingStart) => {
-    if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return newGrid;
-    let newGrid = grid.slice();
-    const tempNode = grid[row][col];
-
-    const nodeIsWall = (tempNode.nodeType === "wall-node" || 
-                        tempNode.nodeType === "wall-node-maze");
-    if (nodeIsWall) return newGrid;
-    
-    if (isMovingStart) {
-        tempNode.nodeType = tempNode.nodeType === "start-node" ? "" : "start-node";
-        updateStartNodePosition(newGrid, row, col);
-    } else {
-        tempNode.nodeType = tempNode.nodeType === "finish-node" ? "" : "finish-node";
-        updateFinishNodePosition(newGrid, row, col);
-    }
-    newGrid[row][col] = tempNode;
-    return newGrid;
-}
 
 /**
  * Clears all of the visited nodes from the grid

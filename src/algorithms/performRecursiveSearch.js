@@ -18,6 +18,7 @@ export default function performRecursiveSearch(grid, startNode, finishNode) {
     
     while (stack.length > 0) {
         const currentNode = stack.pop();
+        console.log("IN RECURSIVE")
         
         // if the closest node is a wall, skip visiting it
         if (currentNode.nodeType === "wall-node" || 
@@ -25,9 +26,6 @@ export default function performRecursiveSearch(grid, startNode, finishNode) {
         
         neighbors = getUnvisitedNeighbors(grid, currentNode);
         stack = stack.concat(neighbors);
-
-        // condition where no path is possible
-        if (currentNode.distance === Infinity) return visitedNodes;
 
         currentNode.isVisited = true;
         visitedNodes.push(currentNode);
