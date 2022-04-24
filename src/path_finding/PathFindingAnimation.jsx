@@ -140,6 +140,8 @@ export default class PathFindingAnimation extends Component {
         } else {
             this.animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
         }
+        document.querySelector('#visitedCounter').textContent = `Visited Nodes = ${visitedNodes.length}`;
+        document.querySelector('#pathCounter').textContent = `Path Nodes = ${nodesInShortestPathOrder.length}`;
 
         this.setState({isVisualized: true});
     }
@@ -401,7 +403,7 @@ export default class PathFindingAnimation extends Component {
         const {grid, mouseIsPressed} = this.state;
         return (
             <>  
-                <div className="header">
+                <nav className="header">
                     <div className="navbar">
                         <div className="title">Pathfinding Visualizer</div>
                         <div className="dropdown" id="algoDropdownDiv" onClick={() => this.toggleDropdown("algoDropdownDiv")}>
@@ -410,6 +412,7 @@ export default class PathFindingAnimation extends Component {
                             </button>
                             <div className="option" id="algoOptions">
                                 <div onClick={() => this.updateAlgoDropdownName("Dijkstra's Algorithm")}>Dijkstra's Algorithm</div>
+                                <div onClick={() => this.updateAlgoDropdownName("Bi-directional Dijkstra's Algorithm")}>Bi-directional Dijkstra's Algorithm</div>
                                 <div onClick={() => this.updateAlgoDropdownName("A* Search")}>A* Search</div>
                                 <div onClick={() => this.updateAlgoDropdownName("Greedy Best-First")}>Greedy Best-First</div>
                                 <div onClick={() => this.updateAlgoDropdownName("Recursive Search")}>Recursive Search</div>
@@ -452,19 +455,48 @@ export default class PathFindingAnimation extends Component {
                             </div>
                         </div>
                     </div>
-                </div> {/* header */}
+                </nav> {/* header */}
                 <div className="body"> 
-                    <div className="visualizerGuide">
-                        
+                     <div className="visualizerGuide">
+                        <ul className="gridItemsVisual">
+                            <li>
+                                <div className="guideItem" id="startNodeImg"></div>
+                                Start Node
+                            </li>
+                            <li>
+                                <div className="guideItem" id="finishNodeImg"></div>
+                                Finish Node
+                            </li>
+                            <li>
+                                <div className="guideItem" id="unvisitedNodeImg"></div>
+                                Unvisited Node
+                            </li>
+                            <li>
+                                <div className="guideItem" id="visitedNodeImg"></div>
+                                Visited Node
+                            </li>
+                            <li>
+                                <div className="guideItem" id="shortestPathNodeImg"></div>
+                                Shortest-path Node
+                            </li>
+                            <li>
+                                <div className="guideItem" id="wallNodeImg"></div>
+                                Wall Node
+                            </li>
+
+
+                        </ul>
                     </div>
-                    <div className="counterDiv">
-                        <div className="counter" id="visitedCount">
-                            Visited Nodes Count
+                    <div className="counterWrapper">
+                        <div className="counterDiv" id="visitedCounter">
+                            Visited Nodes = 0
                         </div>
-                        <div className="counter" id="pathCounter">
-                            Shortest Path Count
+                        <div className="counterDiv" id="pathCounter">
+                            Path Nodes = 0
                         </div>
-                    </div>
+                    </div> 
+
+
                     <div className="grid">
                         {grid.map((row, rowIdx) => {
                             return (

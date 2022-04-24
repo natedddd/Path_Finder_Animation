@@ -12,22 +12,22 @@
     width: 100%;
     min-height: 50px;
     background-color: var(--navbar-color);
-    display: inline-flex;
-    align-items: center;
+    display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .title {
     position: relative;
     color: white;
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: 1.5vw;
     width: 10vw;
 }
 
 .navButton {
     position: relative;
-    margin: 1vw 0.5vw;
+    margin: 1vw 0vw;
     width: 14vw;
     height: 5vh;
     display: flex;
@@ -54,14 +54,14 @@
 
 #visualizebtn {
     background-color: var(--navbar-hover-color);
-    font-size: 1.3em;
+    font-size: 1.8vw;
     -webkit-text-stroke: .008em;
     -webkit-text-stroke-color: rgb(107, 106, 106);
     margin: 5px;
 }
 
 #visualizebtn:hover {
-    font-size: 1.5em;
+    font-size: 2vw;
 }
 
 .button:hover {
@@ -134,30 +134,75 @@
     color: white
 }
 
-.body {
-    display: flexbox;
+/* Body styles begin */
+.visualizerGuide {
+    display: flex;
+    justify-content: center;
+    margin: 0.5vw 0 0.3vw;
+}
 
+ul.gridItemsVisual {
+    margin: 0.5vw;
+    display: flex;
+}
+
+ul.gridItemsVisual li {
+    color: var(--navbar-color);
+    font-size: 1.2vw;
+    font-weight: 500;
+    list-style: none;
+    margin: 0 1.5vw;
+    display: flex;
+}
+
+.guideItem {
+    width: 1.5vw;
+    height: 1.5vw;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin: 0 0.5vw;
+}
+#startNodeImg {   
+    background-image: url("./imgs/startImg.png");
+}
+#finishNodeImg {
+    background-image: url("./imgs/finishImg.png");
+}
+#unvisitedNodeImg {
+    background-image: url("./imgs/unvisitedImg.png");
+}
+#visitedNodeImg {
+    background-image: url("./imgs/visitedImg.png");
+}
+#shortestPathNodeImg {
+    background-image: url("./imgs/pathImg.png");
+}
+#wallNodeImg {
+    background-image: url("./imgs/wallImg.png");
+}
+
+/* Begin counter divs */
+.counterWrapper {
+    color: var(--navbar-color);
+    display: flex;
+    justify-content: center;
 }
 
 .counterDiv {
-    color: var(--navbar-color);
-    background-color: red;
-    width: 15vw;
-    height: 3vw;
-    border-radius: 10px;
-    margin: 5px;
-    font-weight: bold;
+    display: flex;
+    margin: 0 1vw 0.5vw;
     font-size: 1.2vw;
-    justify-content: center;
-    text-align: center;
-    vertical-align: center;
-
-
-    /* display: none; */
+    background-color:powderblue;
+    padding: 0.5vw 0.8vw;
+    border-radius: 15px;
+    color: black;
+    font-weight: 600;
 }
 
+/* Grid styles begin */
 .grid {
     position: absolute;
-    margin: 0vw 11vw;
+    margin: 0vw 8.5vw;
     z-index: -1;
 }

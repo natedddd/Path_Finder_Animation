@@ -3,7 +3,7 @@
 }
 
 .node {
-    width: 1.3vw;
+    width: 1.4vw;
     height: 1.3vw;
     outline: 1px solid gray;
     display: inline-block;
@@ -11,11 +11,15 @@
 }
 
 .start-node {
-    background-color: green;
+    background-color:green
 }
 
 .finish-node {
     background-color: red;
+}
+
+.pit-stop-node {
+    background-color: darkorchid;
 }
 
 .wall-node {

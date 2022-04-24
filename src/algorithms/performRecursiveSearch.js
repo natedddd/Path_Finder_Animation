@@ -11,14 +11,14 @@
 export default function performRecursiveSearch(grid, startNode, finishNode) {
     const visitedNodes = [];
     let stack = [];
+    startNode.isVisited = true;
+    stack.push(startNode);
+    updateUnvisitedNeighbors(grid, startNode);
     let neighbors = getUnvisitedNeighbors(grid, startNode);
     stack = stack.concat(neighbors);
     
-    console.log(stack.length);
-    
     while (stack.length > 0) {
         const currentNode = stack.pop();
-        console.log("IN RECURSIVE")
         
         // if the closest node is a wall, skip visiting it
         if (currentNode.nodeType === "wall-node" || 
@@ -46,7 +46,6 @@ export default function performRecursiveSearch(grid, startNode, finishNode) {
  function getUnvisitedNeighbors(grid, currentNode) {
     const neighbors = []; 
     const {row, col} = currentNode;
-    console.log(grid.length-1)
     if (col < grid[0].length-1) neighbors.push(grid[row][col+1]); // right 
     if (row > 0) neighbors.push(grid[row-1][col]); // up
     if (col > 0) neighbors.push(grid[row][col-1]); // left
