@@ -7,28 +7,72 @@
  * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[]<Node>} All visited nodes in order
  */
-export function performDijkstra(grid, startNode, finishNode) {
+export function performDijkstra(grid, startNode, finishNode, detourNode, hasDetour) {
     const visitedNodes = [];
-    const unvisitedNodes = getAllNodes(grid);
+    let unvisitedNodes = getAllNodes(grid);
     startNode.distance = 0;
+    console.log("distance of startNode is: " + grid[startNode.row][startNode.col].distance)
+    console.log(startNode)
+    console.log(finishNode)
+    console.log(detourNode)
+    
+    if (hasDetour) {
+        while (unvisitedNodes.length > 0) {
+            sortNodesByDistance(unvisitedNodes);
+            const closestNode = unvisitedNodes.shift();
+            
+            // if the closest node is a wall, skip visiting it
+            if (closestNode.nodeType === "wall-node" || 
+            closestNode.nodeType === "wall-node-maze") continue;
+            
+            // condition where no path is possible
+            if (closestNode.distance === Infinity) {
+                console.log("reutrn 1");
+                return visitedNodes;
+            }
+            
+            closestNode.isVisited = true;
+            visitedNodes.push(closestNode);
+            
+            if (closestNode === detourNode) break;
+            updateUnvisitedNeighbors(closestNode, grid);
+        }
+        
+        /**
+         * Reset all of the visited states and distance of previously
+         * visited nodes. Necessary for the second search to work properly
+         */ 
+        resetVisitedandDistance(grid, startNode, finishNode, detourNode);
+        unvisitedNodes = getAllNodes(grid);
+        // grid[detourNode.row][detourNode.col].distance = 0;
+        detourNode.distance = 0;
+        startNode.distance = Infinity;
+    }
 
     while (unvisitedNodes.length > 0) {
         sortNodesByDistance(unvisitedNodes);
         const closestNode = unvisitedNodes.shift();
+        console.log("closest node is: ");
+        console.log(closestNode)
 
-        // if the closest node is a wall, skip visiting it
+        // If the closest node is a wall, skip visiting it
         if (closestNode.nodeType === "wall-node" || 
             closestNode.nodeType === "wall-node-maze") continue;
 
-        // condition where no path is possible
-        if (closestNode.distance === Infinity) return visitedNodes;
+        // Condition where no path is possible
+        if (closestNode.distance === Infinity) {
+            console.log("return 2")
+            return visitedNodes;
+        }
 
         closestNode.isVisited = true;
+        // closestNode.
         visitedNodes.push(closestNode);
 
-        if (closestNode === finishNode) return visitedNodes;
+        if (closestNode.nodeType === "finish-node") return visitedNodes;
         updateUnvisitedNeighbors(closestNode, grid);
     }
+    console.log("get down here")
     return visitedNodes;
 }
 
@@ -92,6 +136,22 @@ function getUnvisitedNeighbors(currentNode, grid) {
     return neighbors.filter(neighbor => !neighbor.isVisited);
 }
 
+function resetVisitedandDistance(grid, startNode, finishNode, detourNode) {
+    for (let row of grid) {
+        for (let node of row) {
+            if (node === startNode || node === finishNode ||
+                node === detourNode) continue;
+
+            const tempNode = {
+                ...node,
+                isVisited: false,
+                distance: Infinity,
+            }
+            grid[node.row][node.col] = tempNode;
+        }
+    }
+}
+
 /**
  * Returns node in the shortest path order from Start to Finish
  * 
@@ -102,7 +162,9 @@ function getUnvisitedNeighbors(currentNode, grid) {
 export function getNodesInShortestPathOrder(finishNode) {
     const shortestPathNodes = [];
     let currentNode = finishNode;
+    console.log(currentNode)
     while (currentNode != null) {
+        // console.log(currentNode)
         shortestPathNodes.unshift(currentNode);
         currentNode = currentNode.previousNode;
     }

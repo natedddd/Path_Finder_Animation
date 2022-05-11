@@ -18,7 +18,7 @@
     background-color: red;
 }
 
-.pit-stop-node {
+.detour-node {
     background-color: darkorchid;
 }
 
@@ -40,7 +40,7 @@
     animation-fill-mode: forwards;
     animation-play-state: running;
     z-index: -5;
-  }
+}
   
 @keyframes visitedAnimation {
     0% {
@@ -67,6 +67,49 @@
         transform: scale(1);
         background-color: rgba(38, 179, 245, 0.75);
     }
+}
+
+.node-visited-detour {
+    animation-name: visitingDetourAnimation;
+    animation-duration: calc(1.5s * var(--animationSpd));
+    animation-timing-function: ease-out;
+    animation-delay: 0;
+    animation-direction: alternate;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+    z-index: -5;
+}
+  
+@keyframes visitingDetourAnimation {
+    0% {
+        transform: scale(1);
+        background-color: rgb(252, 252, 109);
+    }
+    
+    1% {
+        transform: scale(0.3);
+        background-color: rgba(7, 65, 5, 0.75);
+        border-radius: 100%;
+    }
+
+    50% {
+        background-color: rgba(17, 155, 12, 0.75);
+    }
+
+    75% {
+        transform: scale(1.2);
+        background-color: rgba(112, 249, 210, 0.75);
+    }
+
+    100% {
+        transform: scale(1);
+        background-color: rgba(121, 245, 116, 0.75);
+    }
+}
+
+.node-visited-detour-no-anim {
+    background-color: rgba(121, 245, 116, 0.75);
 }
 
 .node-shortest-path-no-anim {

@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import Node from './node/Node'
 import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/performDijkstra";
+import performBiDijkstra from "../algorithms/performBiDijkstra";
 import performAStar from "../algorithms/performAStar";
 import performGreedy from "../algorithms/performGreedy";
 import performRecursiveSearch from "../algorithms/performRecursiveSearch";
@@ -11,18 +12,25 @@ import getRecursiveDivisionMaze from "../mazes/recursiveDivisionMaze";
 
 import './PathFindingAnimation.css'
 
-let START_NODE_ROW = 0; //12
-let START_NODE_COL = 0; //10
-let FINISH_NODE_ROW = 2; // 12
-let FINISH_NODE_COL = 5; // 50
 const NUM_OF_GRID_ROWS = 25;
 const NUM_OF_GRID_COLS = 59;
+
+/** Row/Col values of important nodes */
+let START_NODE_ROW = 12; 
+let START_NODE_COL = 10; 
+let FINISH_NODE_ROW = 12; 
+let FINISH_NODE_COL = 14; 
+let DETOUR_NODE_ROW = 10;
+let DETOUR_NODE_COL = 20;
+
+/** Speed (SPD) determines animation speed */
 const ANIMATE_DEFAULT_ALGO_SPD = 10;
 const ANIMATE_PATH_SPD = 25;
 const ANIMATE_WALL_SPD = 10;
-const SLOW_SPD = 12;
+const SLOW_SPD = 15;
 const NORMAL_SPD = 2;
 const FAST_SPD = 0.6;
+
 /**
  * Creates the object used to provide the grid and visualize the 
  * execution of the selected algorithms. Also handles website controls
@@ -40,10 +48,12 @@ export default class PathFindingAnimation extends Component {
             mouseIsPressed: false,
             isMovingStart: false,
             isMovingFinish: false,
+            isMovingDetour: false, 
             isReadyToAnimate: true,
             isVisualized: false,
             currentAlgo: "dijkstra",
             animationSpeed: FAST_SPD,
+            hasDetour: false,
         };
     }
 
@@ -66,12 +76,18 @@ export default class PathFindingAnimation extends Component {
     handleMouseDown(row, col) {
         if (!this.state.isReadyToAnimate) return;
         
-        let {movingStart, movingFinish} = this.state;
-        if (row === START_NODE_ROW && col === START_NODE_COL) movingStart = true;
-        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) movingFinish = true;
+        let {isMovingStart, isMovingFinish, isMovingDetour} = this.state;
+
+        if (row === START_NODE_ROW && col === START_NODE_COL) isMovingStart = true;
+        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) isMovingFinish = true;
+        if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) isMovingDetour= true;
         
         const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
-        this.setState({grid: newGrid, mouseIsPressed: true, isMovingStart: movingStart, isMovingFinish: movingFinish});
+        this.setState({grid: newGrid, 
+                       mouseIsPressed: true, 
+                       isMovingStart: isMovingStart, 
+                       isMovingFinish: isMovingFinish,
+                       isMovingDetour: isMovingDetour});
     }
     
     /**
@@ -85,10 +101,13 @@ export default class PathFindingAnimation extends Component {
     handleMouseEnter(row, col) {
         if (!this.state.mouseIsPressed) return;
         
-        let {isMovingStart, isMovingFinish} = this.state;
+        let {isMovingStart, isMovingFinish, isMovingDetour} = this.state;
         let newGrid;
         if (isMovingStart || isMovingFinish) {
-            newGrid = this.getNewGridWithMovingStartOrEndNode(this.state.grid, row, col, isMovingStart);
+            newGrid = this.getNewGridWithMovingStartOrFinish(this.state.grid, row, col, isMovingStart);
+            if (this.state.isVisualized) this.visualizeAlgorithm();
+        } else if (isMovingDetour) {
+            newGrid = this.getNewGridWithMovingDetour(this.state.grid, row, col, isMovingDetour);
             if (this.state.isVisualized) this.visualizeAlgorithm();
         } else {
             newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
@@ -100,7 +119,7 @@ export default class PathFindingAnimation extends Component {
      * Resets necessary states to false
      */
     handleMouseUp() {
-        this.setState({mouseIsPressed: false, isMovingStart: false, isMovingFinish:false})
+        this.setState({mouseIsPressed: false, isMovingStart: false, isMovingFinish:false, isMovingDetour: false})
     }
     
     /**
@@ -112,14 +131,19 @@ export default class PathFindingAnimation extends Component {
         this.handleClearVisitedNodes();
         this.hideDropdown();
         this.setState({isReadyToAnimate: false});
-        const {grid, currentAlgo, isVisualized} = this.state;
+
+        const {grid, currentAlgo, isVisualized, hasDetour} = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        const detourNode = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         let visitedNodes;
 
         switch (currentAlgo) {
             case "dijkstra":
-                visitedNodes = performDijkstra(grid, startNode, finishNode);
+                visitedNodes = performDijkstra(grid, startNode, finishNode, detourNode, hasDetour);
+                break;
+            case "bi-dijkstra":
+                visitedNodes = performBiDijkstra(grid, startNode, finishNode);
                 break;
             case "a*":
                 visitedNodes = performAStar(grid, startNode, finishNode);
@@ -135,6 +159,7 @@ export default class PathFindingAnimation extends Component {
                 break;
         }
         const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+        console.log("shortest path Length is: " + nodesInShortestPathOrder.length)
         if (isVisualized) {
             this.visualizeAlgorithmNoAnimation(visitedNodes, nodesInShortestPathOrder);
         } else {
@@ -157,6 +182,8 @@ export default class PathFindingAnimation extends Component {
      *                                                  from Start to Finish node
      */
     visualizeAlgorithmNoAnimation(visitedNodes, nodesInShortestPathOrder) {
+        const {hasDetour} = this.state;
+        let isAnimatingDetour = hasDetour;
         for (let ii = 0; ii <= visitedNodes.length; ii++) {
             if (ii === visitedNodes.length) {
                 for (let ii = 0; ii < nodesInShortestPathOrder.length; ii++) {
@@ -166,6 +193,11 @@ export default class PathFindingAnimation extends Component {
             } else {
                 const node = visitedNodes[ii];
                 document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited-no-anim';
+
+                if (isAnimatingDetour) {
+                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited-detour-no-anim';
+                    if (node.row === DETOUR_NODE_ROW && node.col === DETOUR_NODE_COL) isAnimatingDetour = false;
+                }
             }
         }
         this.setState({isReadyToAnimate: true})
@@ -182,17 +214,23 @@ export default class PathFindingAnimation extends Component {
      *                                                  from Start to Finish node
      */
     animateAlgorithm(visitedNodes, nodesInShortestPathOrder) {
-        const {animationSpeed} = this.state;
+        const {animationSpeed, hasDetour} = this.state;
+        let isAnimatingDetour = hasDetour;
         for (let ii = 0; ii <= visitedNodes.length; ii++) {
             if (ii === visitedNodes.length) {
                 setTimeout(() => {
                     this.animateShortestPath(nodesInShortestPathOrder);
                 }, ANIMATE_DEFAULT_ALGO_SPD * animationSpeed * ii);
             } else {
+                
                 setTimeout(() => {
                     const node = visitedNodes[ii];
                     document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited';
                     document.getElementById(`node-${node.row}-${node.col}`).style.setProperty('--animationSpd',animationSpeed);
+                    if (isAnimatingDetour) {
+                        document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-visited-detour';
+                        if (node.row === DETOUR_NODE_ROW && node.col === DETOUR_NODE_COL) isAnimatingDetour = false;
+                    } 
                 }, ANIMATE_DEFAULT_ALGO_SPD * animationSpeed * ii);
             }
         }
@@ -243,6 +281,20 @@ export default class PathFindingAnimation extends Component {
             this.setState({grid: grid, isReadyToAnimate: true});
         }, ANIMATE_WALL_SPD * animationSpeed * mazeWalls.length);
     }
+
+    handleAddDetour() {
+        let {grid} = this.state;
+        let node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
+        const startNode = grid[START_NODE_ROW][START_NODE_COL];
+        const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        while (node === startNode || node === finishNode) {
+            DETOUR_NODE_ROW++;
+            DETOUR_NODE_COL++
+            node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
+        }
+        grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node"
+        this.setState({grid: grid, hasDetour: true})
+    }
     
     /**
      * Clears only the visited nodes 
@@ -250,8 +302,8 @@ export default class PathFindingAnimation extends Component {
     handleClearVisitedNodes() {
         if (!this.state.isReadyToAnimate) return;
         this.hideDropdown();
-        const {grid} = this.state;
-        clearVisitedNodes(grid);
+        const {grid, hasDetour} = this.state;
+        clearVisitedNodes(grid, hasDetour);
         this.setState({grid: grid, isReadyToAnimate: true, isVisualized: false});
     }
     
@@ -260,8 +312,8 @@ export default class PathFindingAnimation extends Component {
      */
     handleClearAllNodes() {
         if (!this.state.isReadyToAnimate) return;
-        const {grid} = this.state;
-        clearAllNodes(grid);
+        const {grid, hasDetour} = this.state;
+        clearAllNodes(grid, hasDetour);
         this.setState({grid: grid, isReadyToAnimate: true, isVisualized: false});
     }
 
@@ -274,14 +326,25 @@ export default class PathFindingAnimation extends Component {
     updateAlgoDropdownName(algorithmName) {
         document.querySelector('#algoDropdownBtn').textContent = algorithmName;
 
-        if (algorithmName === "Dijkstra's Algorithm") {
-            algorithmName = "dijkstra";
-        } else if (algorithmName === "A* Search") {
-            algorithmName = "a*";
-        } else if (algorithmName === "Greedy Best-First") {
-            algorithmName = "greedy";
-        } else {
-            algorithmName = "recursiveSearch";
+        switch(algorithmName) {
+            case "Dijkstra's Algorithm":
+                algorithmName = "dijkstra"; 
+                break;
+            case "Bi-directional Dijkstra's Algorithm":
+                algorithmName = "bi-dijkstra"; 
+                break;
+            case "A* Search":
+                algorithmName = "a*"; 
+                break;
+            case "Greedy Best-First":
+                algorithmName = "greedy"; 
+                break;
+            case "Recursive Search":
+                algorithmName = "recursiveSearch"; 
+                break;
+            default:
+                console.log("Error: Invalid algorithm in updateAlgoDropdownName()");
+                break;
         }
         this.setState({currentAlgo: algorithmName});
     }
@@ -365,7 +428,7 @@ export default class PathFindingAnimation extends Component {
         this.visualizeAlgorithm();
     }
 
-    /**
+    /** 
      * Returns a new grid after changing a node to either the new Start
      * or Finish node, depending on the isMovingStart boolean
      * 
@@ -375,21 +438,40 @@ export default class PathFindingAnimation extends Component {
      * @param {Boolean} isMovingStart True iff the user is moving the start node
      * @returns The new grid with the new Start or Finish node
      */
-    getNewGridWithMovingStartOrEndNode(grid, row, col, isMovingStart) {
-        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return newGrid;
+    getNewGridWithMovingStartOrFinish(grid, row, col, isMovingStart) {
+        if (row === START_NODE_ROW && col === START_NODE_COL) return grid;
+        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return grid;
+        if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) return grid;
+        let newGrid = grid.slice();
+        const tempNode = grid[row][col];
+        const nodeIsWall = (tempNode.nodeType === "wall-node" || 
+        tempNode.nodeType === "wall-node-maze");
+        if (nodeIsWall) return newGrid;
+        
+        if (isMovingStart) {
+            tempNode.nodeType = "start-node";
+            updateStartNodePosition(newGrid, row, col);
+        } else {
+            tempNode.nodeType = "finish-node";
+            updateFinishNodePosition(newGrid, row, col);
+        }
+        newGrid[row][col] = tempNode;
+        return newGrid;
+    }
+    
+    getNewGridWithMovingDetour(grid, row, col, isMovingDetour) {
+        if (row === START_NODE_ROW && col === START_NODE_COL) return grid;
+        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return grid;
+        if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) return grid;
         let newGrid = grid.slice();
         const tempNode = grid[row][col];
         const nodeIsWall = (tempNode.nodeType === "wall-node" || 
                             tempNode.nodeType === "wall-node-maze");
         if (nodeIsWall) return newGrid;
         
-        if (isMovingStart) {
-            tempNode.nodeType = tempNode.nodeType === "start-node" ? "" : "start-node";
-            updateStartNodePosition(newGrid, row, col);
-        } else {
-            tempNode.nodeType = tempNode.nodeType === "finish-node" ? "" : "finish-node";
-            updateFinishNodePosition(newGrid, row, col);
-        }
+        tempNode.nodeType = "detour-node";
+        updateDetourNodePosition(newGrid, row, col);
+    
         newGrid[row][col] = tempNode;
         return newGrid;
     }
@@ -428,6 +510,11 @@ export default class PathFindingAnimation extends Component {
                                 <div onClick={() => this.updateMazeDropdownName("Recursive Backtrack")}>Recursive Backtrack</div>
                                 <div onClick={() => this.updateMazeDropdownName("Recursive Division")}>Recursive Division</div>
                             </div>
+                        </div>
+                        <div className="navButton">
+                            <button className="button" onClick={() => this.handleAddDetour()}>
+                                Add Detour
+                            </button>
                         </div>
                         <div className="navButton">
                             <button className="button" id="visualizebtn" onClick={() => this.handleVisualizeAlgorithm()}>
@@ -520,6 +607,11 @@ export default class PathFindingAnimation extends Component {
                             );
                         })}
                     </div>
+                    <div>
+                        {/* Could be cool to have side by side
+                        demos of all algorithms competeing against eachother in gifs
+                        below the grid */}
+                    </div>
                 </div>
             </>
         );
@@ -543,7 +635,9 @@ const createNode = (row, col) => {
         distance: Infinity,
         heuristicDistance: Infinity,
         isVisited: false,
+        isVisitedByFinish: false,
         previousNode: null,
+        isVisitedDuringDetour: false, 
     };
 };
 
@@ -574,9 +668,10 @@ const createInitialGrid = () => {
  * @returns {Object[][]<Node>} The new grid with the wall toggled
  */
 const getNewGridWithWallToggled = (grid, row, col) => {
-    // cannot toggle wall on Start or Finish nodes
+    // Cannot toggle wall on Start or Finish nodes
     if ( (row === START_NODE_ROW && col === START_NODE_COL) ||
-         (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) )  {return grid;}
+         (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) ||
+         (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) )  return grid
 
     const newGrid = grid.slice();
     const tempNode = grid[row][col];
@@ -596,17 +691,19 @@ const getNewGridWithWallToggled = (grid, row, col) => {
  * 
  * @param {Object[][]<Node>} grid The current grid state
  */
-function clearVisitedNodes(grid) {
+function clearVisitedNodes(grid, hasDetour) {
     for (const row of grid) {
         for (const node of row) {
             const nodeIsWall = (node.nodeType === "wall-node" || 
                                 node.nodeType === "wall-node-maze");
             node.isVisited = false;
+            node.isVisitedByFinish = false;
             node.distance = Infinity;
             node.heuristicDistance = Infinity;
             node.previousNode = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
                           : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
+                          : (hasDetour && node.row === DETOUR_NODE_ROW && node.col === DETOUR_NODE_COL) ? "detour-node" 
                           : "";
             if (nodeIsWall) node.nodeType = "wall-node";
             document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
@@ -619,14 +716,16 @@ function clearVisitedNodes(grid) {
  * 
  * @param {Object[][]<Node>} grid The current grid state
  */
-function clearAllNodes(grid) {
+function clearAllNodes(grid, hasDetour) {
     for (const row of grid) {
         for (const node of row) {
             node.isVisited = false;
+            node.isVisitedByFinish = false;
             node.distance = Infinity;
             node.previousNode = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
                           : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
+                          : (hasDetour && node.row === DETOUR_NODE_ROW && node.col === DETOUR_NODE_COL) ? "detour-node" 
                           : "";
             document.getElementById(`node-${node.row}-${node.col}`).className = `node ${node.nodeType}`;
         }
@@ -644,6 +743,10 @@ function clearAllNodes(grid) {
 function updateStartNodePosition(grid, row, col) {
     let node = grid[START_NODE_ROW][START_NODE_COL];
     node.nodeType = "";
+    // console.log("start row, col = " +
+    //             START_NODE_ROW + " " +
+    //             START_NODE_COL + " and row = " +
+    //             row + " & col = " + col);
     grid[START_NODE_ROW][START_NODE_COL] = node;
     START_NODE_ROW = row;
     START_NODE_COL = col;
@@ -664,5 +767,22 @@ function updateFinishNodePosition(grid, row, col) {
     grid[FINISH_NODE_ROW][FINISH_NODE_COL] = node;
     FINISH_NODE_ROW = row;
     FINISH_NODE_COL = col;
+    return grid;
+}
+
+/**
+ * Updates the Detour node's row and col macros
+ * 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @param {number} row The row of the node that is being updated
+ * @param {number} col The col of the node that is being updated
+ * @returns {Object[][]<Node>} The new grid state
+ */
+function updateDetourNodePosition(grid, row, col) {
+    let node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
+    node.nodeType = "";
+    grid[DETOUR_NODE_ROW][DETOUR_NODE_COL] = node;
+    DETOUR_NODE_ROW = row;
+    DETOUR_NODE_COL = col;
     return grid;
 }
