@@ -8,18 +8,53 @@
  * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[]<Node>} All visited nodes in order
  */
-export default function performRecursiveSearch(grid, startNode, finishNode) {
+export default function performRecursiveSearch(grid, startNode, finishNode, detourNode, hasDetour) {
     const visitedNodes = [];
     let stack = [];
     startNode.isVisited = true;
     stack.push(startNode);
-    updateUnvisitedNeighbors(grid, startNode);
+
+    updateUnvisitedNeighbors(grid, startNode, hasDetour);
     let neighbors = getUnvisitedNeighbors(grid, startNode);
     stack = stack.concat(neighbors);
     
+    if (hasDetour) {
+        while (stack.length > 0) {
+            const currentNode = stack.pop();
+            
+            // if the closest node is a wall, skip visiting it
+            if (currentNode.nodeType === "wall-node" || 
+                currentNode.nodeType === "wall-node-maze") continue;
+            console.log("BEFGORE")
+            neighbors = getUnvisitedNeighbors(grid, currentNode);
+            console.log("HERE")
+            stack = stack.concat(neighbors);
+    
+            currentNode.isVisited = true;
+            visitedNodes.push(currentNode);
+    
+            if (currentNode === detourNode) break;
+            updateUnvisitedNeighbors(grid, currentNode, hasDetour);
+        }
+        /**
+         * Reset all of the visited states and distance of previously
+         * visited nodes. Necessary for the second search to work properly
+         */ 
+        resetVisitedandDistance(grid, startNode, finishNode, detourNode);
+        clearArray(stack);
+        stack.push(detourNode);
+    
+        updateUnvisitedNeighbors(grid, detourNode, hasDetour);
+        let neighbors = getUnvisitedNeighbors(grid, detourNode);
+        stack = stack.concat(neighbors);
+
+        hasDetour = false;
+
+    }
+    console.log("GET HERE")
     while (stack.length > 0) {
         const currentNode = stack.pop();
-        
+        console.log(currentNode);
         // if the closest node is a wall, skip visiting it
         if (currentNode.nodeType === "wall-node" || 
             currentNode.nodeType === "wall-node-maze") continue;
@@ -31,7 +66,7 @@ export default function performRecursiveSearch(grid, startNode, finishNode) {
         visitedNodes.push(currentNode);
 
         if (currentNode === finishNode) return visitedNodes;
-        updateUnvisitedNeighbors(grid, currentNode);
+        updateUnvisitedNeighbors(grid, currentNode, hasDetour);
     }
     return visitedNodes;
 }
@@ -44,14 +79,20 @@ export default function performRecursiveSearch(grid, startNode, finishNode) {
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
  function getUnvisitedNeighbors(grid, currentNode) {
-    const neighbors = []; 
+     console.log("IN")
+    let neighbors = []; 
     const {row, col} = currentNode;
     if (col < grid[0].length-1) neighbors.push(grid[row][col+1]); // right 
     if (row > 0) neighbors.push(grid[row-1][col]); // up
     if (col > 0) neighbors.push(grid[row][col-1]); // left
     if (row < grid.length-1) neighbors.push(grid[row+1][col]); // down
-    
-    return neighbors.filter( neighbor => (!neighbor.isVisited && neighbor.nodeType != "start-node") );
+    console.log("after")
+
+    neighbors.filter( neighbor => (!neighbor.isVisited && neighbor.nodeType != "start-node") );
+    console.log(
+        "below"
+    )
+    return neighbors;
 }
 
 /**
@@ -61,10 +102,51 @@ export default function performRecursiveSearch(grid, startNode, finishNode) {
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} currentNode Node that was just visited
  */
- function updateUnvisitedNeighbors(grid, currentNode) {
+ function updateUnvisitedNeighbors(grid, currentNode, hasDetour) {
     const neighbors = getUnvisitedNeighbors(grid, currentNode);
 
     for (const neighbor of neighbors) {
-        neighbor.previousNode = currentNode;
+        if (hasDetour) {
+            neighbor.previousNodeDetour = currentNode;
+        } else {
+            neighbor.previousNode = currentNode;
+        }
+    }
+}
+
+/**
+ * Empties a given array
+ * 
+ * @param {Array} array Given array
+ */
+function clearArray(array) {
+    while (array.length) {
+        array.pop();
+    }
+}
+
+/**
+ * Resets necessary attributes to allow overlap (revisiting)
+ * when searching from the Detour node to the Finish node
+ * 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} startNode The grid's Start node
+ * @param {Object<Node>} finishNode The grid's Finish node
+ * @param {Object<Node>} detourNode The grid's Detour node
+ */
+ function resetVisitedandDistance(grid, startNode, finishNode, detourNode) {
+    for (let row of grid) {
+        for (let node of row) {
+            if (node === startNode || node === finishNode ||
+                node === detourNode) continue;
+
+            const tempNode = {
+                ...node,
+                isVisited: false,
+                distance: Infinity,
+                heuristicDistance: Infinity,
+            }
+            grid[node.row][node.col] = tempNode;
+        }
     }
 }

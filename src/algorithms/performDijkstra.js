@@ -98,7 +98,7 @@ function sortNodesByDistance(unvisitedNodes) {
  * @param {Object[][]<Node>} grid The current grid state
  */
 function updateUnvisitedNeighbors(grid, currentNode, hasDetour) {
-    const neighbors = getUnvisitedNeighbors(currentNode, grid);
+    const neighbors = getUnvisitedNeighbors(grid, currentNode);
 
     for (const neighbor of neighbors) {
         neighbor.distance = currentNode.distance + 1;
@@ -114,11 +114,11 @@ function updateUnvisitedNeighbors(grid, currentNode, hasDetour) {
 /**
  * Returns all unvisited neighbors of currentNode
  * 
- * @param {Object<Node>} currentNode Node that was just visited 
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited 
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
-function getUnvisitedNeighbors(currentNode, grid) {
+function getUnvisitedNeighbors(grid, currentNode) {
     const neighbors = []; 
     const {row, col} = currentNode;
 
@@ -130,6 +130,15 @@ function getUnvisitedNeighbors(currentNode, grid) {
     return neighbors.filter(neighbor => !neighbor.isVisited);
 }
 
+/**
+ * Resets necessary attributes to allow overlap (revisiting)
+ * when searching from the Detour node to the Finish node
+ * 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} startNode The grid's Start node
+ * @param {Object<Node>} finishNode The grid's Finish node
+ * @param {Object<Node>} detourNode The grid's Detour node
+ */
 function resetVisitedandDistance(grid, startNode, finishNode, detourNode) {
     for (let row of grid) {
         for (let node of row) {
@@ -158,6 +167,9 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
     let currentNode = finishNode;
     let isBuildingDetourPath = false;
     while (currentNode != null) {
+        console.log("In getNodeInShortestPath");
+        // console.log(currentNode);
+
         if (currentNode == detourNode && hasDetour) isBuildingDetourPath = true;
         shortestPathNodes.unshift(currentNode);
 
@@ -170,5 +182,6 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
     // case where the only node in the path is the end node
     // and no path can be found
     if (shortestPathNodes.length === 1) return []; 
+    console.log(shortestPathNodes.length);
     return shortestPathNodes;
 }

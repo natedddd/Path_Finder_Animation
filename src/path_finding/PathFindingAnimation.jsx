@@ -146,13 +146,13 @@ export default class PathFindingAnimation extends Component {
                 visitedNodes = performBiDijkstra(grid, startNode, finishNode);
                 break;
             case "a*":
-                visitedNodes = performAStar(grid, startNode, finishNode);
+                visitedNodes = performAStar(grid, startNode, finishNode, detourNode, hasDetour);
                 break;
             case "greedy":
-                visitedNodes = performGreedy(grid, startNode, finishNode);
+                visitedNodes = performGreedy(grid, startNode, finishNode, detourNode, hasDetour);
                 break;
             case "recursiveSearch":
-                visitedNodes = performRecursiveSearch(grid, startNode, finishNode);
+                visitedNodes = performRecursiveSearch(grid, startNode, finishNode, detourNode, hasDetour);
                 break;
             default:
                 console.log("Error visualizing algorithms. No valid algorithm select");
