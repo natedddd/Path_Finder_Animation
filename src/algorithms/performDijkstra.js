@@ -11,10 +11,6 @@ export function performDijkstra(grid, startNode, finishNode, detourNode, hasDeto
     const visitedNodes = [];
     let unvisitedNodes = getAllNodes(grid);
     startNode.distance = 0;
-    console.log("distance of startNode is: " + grid[startNode.row][startNode.col].distance)
-    console.log(startNode)
-    console.log(finishNode)
-    console.log(detourNode)
     
     if (hasDetour) {
         while (unvisitedNodes.length > 0) {
@@ -26,16 +22,13 @@ export function performDijkstra(grid, startNode, finishNode, detourNode, hasDeto
             closestNode.nodeType === "wall-node-maze") continue;
             
             // condition where no path is possible
-            if (closestNode.distance === Infinity) {
-                console.log("reutrn 1");
-                return visitedNodes;
-            }
+            if (closestNode.distance === Infinity) return visitedNodes;
             
             closestNode.isVisited = true;
             visitedNodes.push(closestNode);
             
             if (closestNode === detourNode) break;
-            updateUnvisitedNeighbors(closestNode, grid);
+            updateUnvisitedNeighbors(grid, closestNode, hasDetour);
         }
         
         /**
@@ -44,35 +37,31 @@ export function performDijkstra(grid, startNode, finishNode, detourNode, hasDeto
          */ 
         resetVisitedandDistance(grid, startNode, finishNode, detourNode);
         unvisitedNodes = getAllNodes(grid);
-        // grid[detourNode.row][detourNode.col].distance = 0;
         detourNode.distance = 0;
         startNode.distance = Infinity;
+        finishNode.distance = Infinity;
+        finishNode.isVisited = false;
+        startNode.isVisited = false;
+        hasDetour = false;
     }
 
     while (unvisitedNodes.length > 0) {
         sortNodesByDistance(unvisitedNodes);
         const closestNode = unvisitedNodes.shift();
-        console.log("closest node is: ");
-        console.log(closestNode)
 
         // If the closest node is a wall, skip visiting it
         if (closestNode.nodeType === "wall-node" || 
             closestNode.nodeType === "wall-node-maze") continue;
 
         // Condition where no path is possible
-        if (closestNode.distance === Infinity) {
-            console.log("return 2")
-            return visitedNodes;
-        }
+        if (closestNode.distance === Infinity) return visitedNodes;
 
         closestNode.isVisited = true;
-        // closestNode.
         visitedNodes.push(closestNode);
 
         if (closestNode.nodeType === "finish-node") return visitedNodes;
-        updateUnvisitedNeighbors(closestNode, grid);
+        updateUnvisitedNeighbors(grid, closestNode, hasDetour);
     }
-    console.log("get down here")
     return visitedNodes;
 }
 
@@ -108,12 +97,17 @@ function sortNodesByDistance(unvisitedNodes) {
  * @param {Object<Node>} currentNode Node that was just visited
  * @param {Object[][]<Node>} grid The current grid state
  */
-function updateUnvisitedNeighbors(currentNode, grid) {
+function updateUnvisitedNeighbors(grid, currentNode, hasDetour) {
     const neighbors = getUnvisitedNeighbors(currentNode, grid);
 
     for (const neighbor of neighbors) {
         neighbor.distance = currentNode.distance + 1;
-        neighbor.previousNode = currentNode;
+
+        if (hasDetour) {
+            neighbor.previousNodeDetour = currentNode;
+        } else {
+            neighbor.previousNode = currentNode;
+        }
     }
 }
 
@@ -159,14 +153,19 @@ function resetVisitedandDistance(grid, startNode, finishNode, detourNode) {
  * @returns {Object[]<Node>} The nodes that make the shortest path returned
  *                           in order from Start to Finish Node
  */
-export function getNodesInShortestPathOrder(finishNode) {
+export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
     const shortestPathNodes = [];
     let currentNode = finishNode;
-    console.log(currentNode)
+    let isBuildingDetourPath = false;
     while (currentNode != null) {
-        // console.log(currentNode)
+        if (currentNode == detourNode && hasDetour) isBuildingDetourPath = true;
         shortestPathNodes.unshift(currentNode);
-        currentNode = currentNode.previousNode;
+
+        if (isBuildingDetourPath) {
+            currentNode = currentNode.previousNodeDetour;
+        } else {
+            currentNode = currentNode.previousNode;
+        }
     }
     // case where the only node in the path is the end node
     // and no path can be found

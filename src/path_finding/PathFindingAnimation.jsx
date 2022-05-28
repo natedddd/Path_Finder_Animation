@@ -158,8 +158,7 @@ export default class PathFindingAnimation extends Component {
                 console.log("Error visualizing algorithms. No valid algorithm select");
                 break;
         }
-        const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-        console.log("shortest path Length is: " + nodesInShortestPathOrder.length)
+        const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode, detourNode, hasDetour);
         if (isVisualized) {
             this.visualizeAlgorithmNoAnimation(visitedNodes, nodesInShortestPathOrder);
         } else {
@@ -200,6 +199,9 @@ export default class PathFindingAnimation extends Component {
                 }
             }
         }
+        document.getElementById(`node-${START_NODE_ROW}-${START_NODE_COL}`).className = 'node start-node';
+        document.getElementById(`node-${FINISH_NODE_ROW}-${FINISH_NODE_COL}`).className = 'node finish-node';
+        if (hasDetour) document.getElementById(`node-${DETOUR_NODE_ROW}-${DETOUR_NODE_COL}`).className = 'node detour-node';
         this.setState({isReadyToAnimate: true})
     }
 
@@ -243,7 +245,7 @@ export default class PathFindingAnimation extends Component {
      *                                                  from Start to Finish node
      */
     animateShortestPath(nodesInShortestPathOrder) {
-        const {animationSpeed} = this.state;
+        const {animationSpeed, hasDetour} = this.state;
         for (let ii = 0; ii < nodesInShortestPathOrder.length; ii++) {
             setTimeout(() => {
                 const node = nodesInShortestPathOrder[ii];
@@ -252,6 +254,9 @@ export default class PathFindingAnimation extends Component {
         }
         setTimeout(() => {
             this.state.isReadyToAnimate = true;
+            document.getElementById(`node-${START_NODE_ROW}-${START_NODE_COL}`).className = 'node start-node';
+            document.getElementById(`node-${FINISH_NODE_ROW}-${FINISH_NODE_COL}`).className = 'node finish-node';
+            if (hasDetour) document.getElementById(`node-${DETOUR_NODE_ROW}-${DETOUR_NODE_COL}`).className = 'node detour-node';
             console.log("ready to animate");
         }, ANIMATE_PATH_SPD * animationSpeed * nodesInShortestPathOrder.length);
     }
@@ -637,7 +642,7 @@ const createNode = (row, col) => {
         isVisited: false,
         isVisitedByFinish: false,
         previousNode: null,
-        isVisitedDuringDetour: false, 
+        previousNodeDetour: null,
     };
 };
 
@@ -701,6 +706,7 @@ function clearVisitedNodes(grid, hasDetour) {
             node.distance = Infinity;
             node.heuristicDistance = Infinity;
             node.previousNode = null;
+            node.previousNodeDetour = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
                           : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
                           : (hasDetour && node.row === DETOUR_NODE_ROW && node.col === DETOUR_NODE_COL) ? "detour-node" 
@@ -723,6 +729,7 @@ function clearAllNodes(grid, hasDetour) {
             node.isVisitedByFinish = false;
             node.distance = Infinity;
             node.previousNode = null;
+            node.previousNodeDetour = null;
             node.nodeType = (node.row === START_NODE_ROW && node.col === START_NODE_COL) ? "start-node" 
                           : (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) ? "finish-node" 
                           : (hasDetour && node.row === DETOUR_NODE_ROW && node.col === DETOUR_NODE_COL) ? "detour-node" 

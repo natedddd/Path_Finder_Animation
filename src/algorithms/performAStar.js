@@ -17,7 +17,7 @@ export default function performAStar(grid, startNode, finishNode) {
     startNode.distance = 0;
     startNode.heuristicDistance = getDistanceFromFinish(startNode, finishNode);
 
-    while (unvisitedNodes.length != 0) {
+    while (unvisitedNodes.length > 0) {
         sortNodesByDistance(unvisitedNodes, finishNode);
         const closestNode = unvisitedNodes.shift();
         
