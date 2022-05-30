@@ -51,7 +51,7 @@
     while (unvisitedNodes.length > 0) {
         sortNodesByDistance(unvisitedNodes, finishNode);
         const closestNode = unvisitedNodes.shift();
-        console.log(closestNode)
+        
         // if the closest node is a wall, skip visiting it
         if (closestNode.nodeType === "wall-node" || 
             closestNode.nodeType === "wall-node-maze") continue;

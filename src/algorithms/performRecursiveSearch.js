@@ -15,7 +15,7 @@ export default function performRecursiveSearch(grid, startNode, finishNode, deto
     stack.push(startNode);
 
     updateUnvisitedNeighbors(grid, startNode, hasDetour);
-    let neighbors = getUnvisitedNeighbors(grid, startNode);
+    let neighbors = getUnvisitedNeighbors(grid, startNode, hasDetour);
     stack = stack.concat(neighbors);
     
     if (hasDetour) {
@@ -25,9 +25,8 @@ export default function performRecursiveSearch(grid, startNode, finishNode, deto
             // if the closest node is a wall, skip visiting it
             if (currentNode.nodeType === "wall-node" || 
                 currentNode.nodeType === "wall-node-maze") continue;
-            console.log("BEFGORE")
-            neighbors = getUnvisitedNeighbors(grid, currentNode);
-            console.log("HERE")
+            
+            neighbors = getUnvisitedNeighbors(grid, currentNode, hasDetour);
             stack = stack.concat(neighbors);
     
             currentNode.isVisited = true;
@@ -36,30 +35,33 @@ export default function performRecursiveSearch(grid, startNode, finishNode, deto
             if (currentNode === detourNode) break;
             updateUnvisitedNeighbors(grid, currentNode, hasDetour);
         }
+        if (stack.length === 0) return visitedNodes;
         /**
          * Reset all of the visited states and distance of previously
          * visited nodes. Necessary for the second search to work properly
          */ 
         resetVisitedandDistance(grid, startNode, finishNode, detourNode);
         clearArray(stack);
+        console.log(stack.length)
+        detourNode.isVisited = true;
         stack.push(detourNode);
     
+        hasDetour = false;
         updateUnvisitedNeighbors(grid, detourNode, hasDetour);
-        let neighbors = getUnvisitedNeighbors(grid, detourNode);
+        neighbors = getUnvisitedNeighbors(grid, detourNode, hasDetour);
         stack = stack.concat(neighbors);
 
-        hasDetour = false;
-
+        finishNode.isVisited = false;
+        startNode.isVisited = false;
     }
-    console.log("GET HERE")
     while (stack.length > 0) {
         const currentNode = stack.pop();
-        console.log(currentNode);
+
         // if the closest node is a wall, skip visiting it
         if (currentNode.nodeType === "wall-node" || 
             currentNode.nodeType === "wall-node-maze") continue;
         
-        neighbors = getUnvisitedNeighbors(grid, currentNode);
+        neighbors = getUnvisitedNeighbors(grid, currentNode, hasDetour);
         stack = stack.concat(neighbors);
 
         currentNode.isVisited = true;
@@ -78,21 +80,18 @@ export default function performRecursiveSearch(grid, startNode, finishNode, deto
  * @param {Object[][]<Node>} grid The current grid state
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
- function getUnvisitedNeighbors(grid, currentNode) {
-     console.log("IN")
+ function getUnvisitedNeighbors(grid, currentNode, hasDetour) {
     let neighbors = []; 
     const {row, col} = currentNode;
     if (col < grid[0].length-1) neighbors.push(grid[row][col+1]); // right 
     if (row > 0) neighbors.push(grid[row-1][col]); // up
     if (col > 0) neighbors.push(grid[row][col-1]); // left
     if (row < grid.length-1) neighbors.push(grid[row+1][col]); // down
-    console.log("after")
 
-    neighbors.filter( neighbor => (!neighbor.isVisited && neighbor.nodeType != "start-node") );
-    console.log(
-        "below"
-    )
-    return neighbors;
+    if (hasDetour) {
+        return neighbors.filter( neighbor => (!neighbor.isVisited) );
+    } 
+    return neighbors.filter( neighbor => (!neighbor.isVisited) );
 }
 
 /**
@@ -103,7 +102,7 @@ export default function performRecursiveSearch(grid, startNode, finishNode, deto
  * @param {Object<Node>} currentNode Node that was just visited
  */
  function updateUnvisitedNeighbors(grid, currentNode, hasDetour) {
-    const neighbors = getUnvisitedNeighbors(grid, currentNode);
+    const neighbors = getUnvisitedNeighbors(grid, currentNode, hasDetour);
 
     for (const neighbor of neighbors) {
         if (hasDetour) {

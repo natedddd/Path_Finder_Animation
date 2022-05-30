@@ -187,7 +187,11 @@ export default class PathFindingAnimation extends Component {
             if (ii === visitedNodes.length) {
                 for (let ii = 0; ii < nodesInShortestPathOrder.length; ii++) {
                     const node = nodesInShortestPathOrder[ii];
-                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path-no-anim';
+                    if (document.getElementById(`node-${node.row}-${node.col}`).className === 'node node-shortest-path-no-anim') {
+                        document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path-overlap-no-anim';
+                    } else {
+                        document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path-no-anim'
+                    }
                 }
             } else {
                 const node = visitedNodes[ii];
@@ -249,7 +253,11 @@ export default class PathFindingAnimation extends Component {
         for (let ii = 0; ii < nodesInShortestPathOrder.length; ii++) {
             setTimeout(() => {
                 const node = nodesInShortestPathOrder[ii];
-                document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path';
+                if (document.getElementById(`node-${node.row}-${node.col}`).className === 'node node-shortest-path') {
+                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path-overlap';
+                } else {
+                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-shortest-path';
+                }
             }, ANIMATE_PATH_SPD * animationSpeed * ii);
         }
         setTimeout(() => {
@@ -575,7 +583,7 @@ export default class PathFindingAnimation extends Component {
                                 <div className="guideItem" id="wallNodeImg"></div>
                                 Wall Node
                             </li>
-
+                        {/*  Need to add green for visited by detour and add orange for overlapping path */}
 
                         </ul>
                     </div>
@@ -677,7 +685,9 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     if ( (row === START_NODE_ROW && col === START_NODE_COL) ||
          (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) ||
          (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) )  return grid
-
+    console.log(
+        "row is: " + row + " and col is: " + col
+    )
     const newGrid = grid.slice();
     const tempNode = grid[row][col];
     const newNode = {

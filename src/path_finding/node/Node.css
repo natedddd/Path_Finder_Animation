@@ -140,6 +140,34 @@
     }
 }
 
+.node-shortest-path-overlap {
+    animation-name: shortestPathAnimationOverlap;
+    animation-duration: calc(1s * var(--animationSpd));
+    animation-timing-function: ease-out;
+    animation-delay: 0;
+    animation-direction: alternate;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+}
+    
+@keyframes shortestPathAnimationOverlap {
+    0% {
+        transform: scale(0.3);
+        background-color: rgb(255, 183, 0);
+        border-radius: 50%;
+    }
+
+    100% {
+        transform: scale(1);
+        background-color: rgb(255, 183, 0);
+    }
+}
+
+.node-shortest-path-overlap-no-anim {
+    background-color: rgb(255, 183, 0);
+}
+
 .wall-node-maze {
     background-color: rgb(12, 53, 71);
     animation-name: wallMaze;

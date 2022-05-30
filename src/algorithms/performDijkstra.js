@@ -166,9 +166,10 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
     const shortestPathNodes = [];
     let currentNode = finishNode;
     let isBuildingDetourPath = false;
+    console.log("In getNodeInShortestPath");
+    let x = 0;
     while (currentNode != null) {
-        console.log("In getNodeInShortestPath");
-        // console.log(currentNode);
+        console.log(currentNode);
 
         if (currentNode == detourNode && hasDetour) isBuildingDetourPath = true;
         shortestPathNodes.unshift(currentNode);
@@ -178,6 +179,9 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
         } else {
             currentNode = currentNode.previousNode;
         }
+
+        // if (x === 100) break;
+        x++;
     }
     // case where the only node in the path is the end node
     // and no path can be found
