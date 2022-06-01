@@ -168,8 +168,8 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
     let isBuildingDetourPath = false;
     console.log("In getNodeInShortestPath");
     let x = 0;
+    console.log(currentNode);
     while (currentNode != null) {
-        // console.log(currentNode);
 
         if (currentNode == detourNode && hasDetour) isBuildingDetourPath = true;
         shortestPathNodes.unshift(currentNode);
@@ -180,7 +180,8 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
             currentNode = currentNode.previousNode;
         }
 
-        if (x === 100) {
+        // Hack - catches any infinite loop conditions for bi-directional
+        if (x === 200) {
             console.log("ERROR")
             break;
         }

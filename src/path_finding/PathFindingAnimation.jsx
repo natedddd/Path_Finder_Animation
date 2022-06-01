@@ -651,6 +651,7 @@ const createNode = (row, col) => {
         isVisitedByFinish: false,
         previousNode: null,
         previousNodeDetour: null,
+        nextNode: null, 
     };
 };
 

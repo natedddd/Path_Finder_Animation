@@ -31,7 +31,7 @@
         if (closestNode.isVisitedByFinish) {
             console.log("break 1")
             console.log(closestNode)
-            // connectShortestPathFromStart(grid, closestNode);
+            connectShortestPaths(grid, closestNode, startNode);
             return visitedNodes;
         }
         
@@ -55,7 +55,7 @@
         if (closestNode.isVisited) {
             console.log("break 2")
             console.log(closestNode)
-            connectShortestPathFromFinish(grid, closestNode, startNode);
+            connectShortestPaths(grid, closestNode, startNode);
             return visitedNodes;
         }
 
@@ -114,6 +114,8 @@ function updateUnvisitedNeighbors(grid, currentNode) {
     // console.log(currentNode)
     for (const neighbor of neighbors) {
         if (neighbor.isVisitedByFinish) continue;
+        // if (neighbor.previousNode != null) continue;
+
         neighbor.distance = currentNode.distance + 1;
         neighbor.previousNode = currentNode;
     }
@@ -131,8 +133,10 @@ function updateUnvisitedHeuristicNeighbors(grid, currentNode) {
     
     for (const neighbor of neighbors) {
         if (neighbor.isVisited) continue;
+        // if (neighbor.previousNode != null) continue;
+
         neighbor.heuristicDistance = currentNode.heuristicDistance + 1;
-        neighbor.previousNode = currentNode;
+        neighbor.nextNode = currentNode;
     }
 }
 
@@ -147,17 +151,10 @@ function getUnvisitedNeighbors(grid, currentNode) {
     let neighbors = []; 
     const {row, col} = currentNode;
 
-    if (row == 12 &&  col == 12) {
-        console.log("HERE")
-    }
-
     if (col < grid[0].length-1) neighbors.push(grid[row][col+1]); // right
     if (row > 0) neighbors.push(grid[row-1][col]); // top 
     if (col > 0) neighbors.push(grid[row][col-1]); // left
     if (row < grid.length-1) neighbors.push(grid[row+1][col]); // bottom
-    
-    neighbors = neighbors.filter(neighbor => !neighbor.isVisited)
-    console.log(neighbors)
 
     return neighbors.filter(neighbor => !neighbor.isVisited);
 }
@@ -173,112 +170,50 @@ function getUnvisitedNeighbors(grid, currentNode) {
     const neighbors = []; 
     const {row, col} = currentNode;
 
-    if (row == 12 &&  col == 12) {
-        console.log("HERE")
-    }
-
-    if (col > 0) neighbors.push(grid[row][col-1]); // left
-    if (row > 0) neighbors.push(grid[row-1][col]); // top 
     if (col < grid[0].length-1) neighbors.push(grid[row][col+1]); // right
+    if (row > 0) neighbors.push(grid[row-1][col]); // top 
+    if (col > 0) neighbors.push(grid[row][col-1]); // left
     if (row < grid.length-1) neighbors.push(grid[row+1][col]); // bottom
 
     return neighbors.filter(neighbor => !neighbor.isVisitedByFinish);
 }
 
-// function connectShortestPathFromStart(grid, closestNode) {
-//     let neighbors = getUnvisitedNeighbors(grid, closestNode);
-//     let connectingNode;
+function connectShortestPaths(grid, closestNode, startNode) {
+    let closestNodePrevious = closestNode.previousNode;
+    console.log("Closest node");
+    console.log(closestNode);
 
-//     // Only consider nodes that have been visited by the Finish Dijktra,
-//     // and pick the node that is has the smallest distance from the Finish
-//     neighbors = neighbors.filter(neighbor => neighbor.isVisitedByFinish);
-//     sortNodesByHeuristicDistance(neighbors);
-//     connectingNode = neighbors[0];
-
-//     while (connectingNode.previousNode !== null) {
-//         const temp = connectingNode.previousNode;
-//         connectingNode.previousNode = closestNode;
-//         closestNode = connectingNode;
-//         connectingNode = temp;
-//     }
-//     connectingNode.previousNode = closestNode;
-// }
-
-function connectShortestPathFromFinish(grid, closestNode, startNode) {
     let neighbors = getUnvisitedNeighbors(grid, closestNode);
-    let connectingNode;
-    
-    // Only consider nodes that have been visited by the Start Dijktra,
-    // and pick the node that is has the smallest distance from the Start
-    neighbors = neighbors.filter(neighbor => neighbor.isVisitedByFinish);
+    neighbors = neighbors.filter(neighbor => neighbor.isVisitedByFinish)
     sortNodesByDistance(neighbors);
-    connectingNode = neighbors[0];
-    // console.log("closest node: ")
-    // console.log(closestNode)
-    console.log("connectingNode ")
-    console.log(connectingNode)
+    let finishPathNode = neighbors[0];
 
+    console.log("finish path node ");
+    console.log(finishPathNode);
 
-    const closestNodeDistFromStart = getDistanceFromTarget(closestNode, startNode);
-    const connectingNodeDistFromStart = getDistanceFromTarget(connectingNode, startNode);
+    let nodeA = closestNode;
+    let nodeB = finishPathNode;
 
-    if (connectingNodeDistFromStart < closestNodeDistFromStart) {
-        neighbors = getUnvisitedHeuristicNeighbors(grid, closestNode);
-        neighbors = neighbors.filter(neighbor => neighbor.isVisited);
-        sortNodesByDistance(neighbors);
-        connectingNode = neighbors[0];
-
-
-        while (closestNode.previousNode !== null) {
-            const temp = closestNode.previousNode;
-            closestNode.previousNode = connectingNode;
-            connectingNode = closestNode;
-            closestNode = temp;
-            
-        }
-          closestNode.previousNode = connectingNode;
-    } else {
-        while (connectingNode.previousNode !== null) {
-            const temp = connectingNode.previousNode;
-            connectingNode.previousNode = closestNode;
-            closestNode = connectingNode;
-            connectingNode = temp;
-        }
-        connectingNode.previousNode = closestNode;
+    if (nodeB.nodeType === "finish-node") {
+        nodeB.previousNode = nodeA;
+        return;
     }
 
-    // while (closestNode.previousNode !== null) {
-    //     const temp = closestNode.previousNode;
-    //     closestNode.previousNode = connectingNode;
-    //     connectingNode = closestNode;
-    //     closestNode = temp;
-        
-    // }
-    // closestNode.previousNode = connectingNode;
-    // while (connectingNode.previousNode !== null) {
-    //     const temp = connectingNode.previousNode;
-    //     connectingNode.previousNode = closestNode;
-    //     closestNode = connectingNode;
-    //     connectingNode = temp;
-    // }
-    // connectingNode.previousNode = closestNode;
-    // console.log("closest node: ")
-    // console.log(closestNode)
-    // console.log("connectingNode ")
-    // console.log(connectingNode)
-}
+    while (nodeB.nextNode != null) {
+        let temp = nodeB.nextNode;
+        nodeB.previousNode = nodeA;
 
-/**
- * Calculates the minimum distance to travel from the current node
- * to the Finish node
- * 
- * @param {Object<Node>} currentNode The current node being considered
- * @param {Object<Node>} targetNode The grid's Finish node
- * @returns {number} The minimum distance to the Finish node
- */
- function getDistanceFromTarget(currentNode, targetNode) {
-    const distX = Math.abs(currentNode.row - targetNode.row);
-    const distY = Math.abs(currentNode.col - targetNode.col);
+        // if (temp === nodeA) {
+        //     nodeA = nodeB.nextNode.nextNode;
+        //     nodeB = temp;
+        // } else {
+            nodeA = nodeB;
+            nodeB = temp;
+        // }
 
-    return distX + distY;
+
+        if (nodeB.nodeType === "finish-node") break;
+        // break;
+    }
+    nodeB.previousNode = nodeA;
 }
