@@ -113,8 +113,16 @@ function updateUnvisitedNeighbors(grid, currentNode) {
     // console.log("in update unvisited")
     // console.log(currentNode)
     for (const neighbor of neighbors) {
-        if (neighbor.isVisitedByFinish) continue;
+        if (neighbor.isVisitedByFinish ||
+            neighbor.isVisited) continue;
         // if (neighbor.previousNode != null) continue;
+        if (neighbor.row === 11 && neighbor.col === 12) {
+            console.log("current node")
+            console.log(currentNode)
+            console.log("neighbor: ")
+            console.log(neighbor);
+            
+        }
 
         neighbor.distance = currentNode.distance + 1;
         neighbor.previousNode = currentNode;
@@ -132,8 +140,16 @@ function updateUnvisitedHeuristicNeighbors(grid, currentNode) {
     const neighbors = getUnvisitedHeuristicNeighbors(grid, currentNode);
     
     for (const neighbor of neighbors) {
-        if (neighbor.isVisited) continue;
+        if (neighbor.isVisitedByFinish ||
+            neighbor.isVisited) continue;
         // if (neighbor.previousNode != null) continue;
+        if (neighbor.row === 11 && neighbor.col === 12) {
+            console.log("current node")
+            console.log(currentNode)
+            console.log("neighbor: ")
+            console.log(neighbor);
+
+        }
 
         neighbor.heuristicDistance = currentNode.heuristicDistance + 1;
         neighbor.nextNode = currentNode;
@@ -185,7 +201,7 @@ function connectShortestPaths(grid, closestNode, startNode) {
 
     let neighbors = getUnvisitedNeighbors(grid, closestNode);
     neighbors = neighbors.filter(neighbor => neighbor.isVisitedByFinish)
-    sortNodesByDistance(neighbors);
+    sortNodesByHeuristicDistance(neighbors);
     let finishPathNode = neighbors[0];
 
     console.log("finish path node ");
