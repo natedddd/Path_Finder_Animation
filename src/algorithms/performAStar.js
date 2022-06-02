@@ -7,8 +7,8 @@
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} startNode The grid's Start node
  * @param {Object<Node>} finishNode The grid's Finish node
- * @param {Object<Node>*} detourNode The grid's Detour node
- * @param {Boolean} hasDetour Whether or not there is a Detour node in the grid
+ * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  * @returns {Object[]<Node>} All visited nodes in order
  */
 export default function performAStar(grid, startNode, finishNode, detourNode, hasDetour) {
@@ -137,8 +137,8 @@ function getDistanceFromTarget(currentNode, targetNode) {
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} currentNode Node that was just visited 
  * @param {Object<Node>} finishNode The grid's Finish node
- * @param {Object<Node>*} detourNode The grid's Detour node
- * @param {Boolean} hasDetour Whether or not there is a Detour node in the grid
+ * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  */
 function updateUnvisitedNeighbors(grid, currentNode, finishNode, detourNode, hasDetour) {
     const neighbors = getUnvisitedNeighbors(grid, currentNode);

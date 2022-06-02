@@ -4,7 +4,9 @@
  * 
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} startNode The grid's Start node
- * @param {Object<Node>} finishNode The grid's Finish node
+ * @param {Object<Node>} finishNode The grid's Finish node 
+ * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  * @returns {Object[]<Node>} All visited nodes in order
  */
 export function performDijkstra(grid, startNode, finishNode, detourNode, hasDetour) {
@@ -94,8 +96,9 @@ function sortNodesByDistance(unvisitedNodes) {
  * Increases the unvisited neighbor's 'distance' by 1 beacuse
  * it is one node farther away fromt the start node
  * 
- * @param {Object<Node>} currentNode Node that was just visited
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  */
 function updateUnvisitedNeighbors(grid, currentNode, hasDetour) {
     const neighbors = getUnvisitedNeighbors(grid, currentNode);
@@ -159,6 +162,8 @@ function resetVisitedandDistance(grid, startNode, finishNode, detourNode) {
  * Returns node in the shortest path order from Start to Finish
  * 
  * @param {Object<Node>} finishNode The grid's Finish node 
+ * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  * @returns {Object[]<Node>} The nodes that make the shortest path returned
  *                           in order from Start to Finish Node
  */
@@ -166,9 +171,7 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
     const shortestPathNodes = [];
     let currentNode = finishNode;
     let isBuildingDetourPath = false;
-    console.log("In getNodeInShortestPath");
-    let x = 0;
-    console.log(currentNode);
+
     while (currentNode != null) {
 
         if (currentNode == detourNode && hasDetour) isBuildingDetourPath = true;
@@ -179,13 +182,6 @@ export function getNodesInShortestPathOrder(finishNode, detourNode, hasDetour) {
         } else {
             currentNode = currentNode.previousNode;
         }
-
-        // Hack - catches any infinite loop conditions for bi-directional
-        if (x === 200) {
-            console.log("ERROR")
-            break;
-        }
-        x++;
     }
     // case where the only node in the path is the end node
     // and no path can be found

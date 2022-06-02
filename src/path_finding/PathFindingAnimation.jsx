@@ -103,11 +103,12 @@ export default class PathFindingAnimation extends Component {
         
         let {isMovingStart, isMovingFinish, isMovingDetour} = this.state;
         let newGrid;
+        
         if (isMovingStart || isMovingFinish) {
             newGrid = this.getNewGridWithMovingStartOrFinish(this.state.grid, row, col, isMovingStart);
             if (this.state.isVisualized) this.visualizeAlgorithm();
         } else if (isMovingDetour) {
-            newGrid = this.getNewGridWithMovingDetour(this.state.grid, row, col, isMovingDetour);
+            newGrid = this.getNewGridWithMovingDetour(this.state.grid, row, col);
             if (this.state.isVisualized) this.visualizeAlgorithm();
         } else {
             newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
@@ -455,10 +456,11 @@ export default class PathFindingAnimation extends Component {
         if (row === START_NODE_ROW && col === START_NODE_COL) return grid;
         if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return grid;
         if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) return grid;
+
         let newGrid = grid.slice();
         const tempNode = grid[row][col];
         const nodeIsWall = (tempNode.nodeType === "wall-node" || 
-        tempNode.nodeType === "wall-node-maze");
+                            tempNode.nodeType === "wall-node-maze");
         if (nodeIsWall) return newGrid;
         
         if (isMovingStart) {
@@ -472,10 +474,11 @@ export default class PathFindingAnimation extends Component {
         return newGrid;
     }
     
-    getNewGridWithMovingDetour(grid, row, col, isMovingDetour) {
+    getNewGridWithMovingDetour(grid, row, col) {
         if (row === START_NODE_ROW && col === START_NODE_COL) return grid;
         if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return grid;
         if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) return grid;
+
         let newGrid = grid.slice();
         const tempNode = grid[row][col];
         const nodeIsWall = (tempNode.nodeType === "wall-node" || 
@@ -761,10 +764,6 @@ function clearAllNodes(grid, hasDetour) {
 function updateStartNodePosition(grid, row, col) {
     let node = grid[START_NODE_ROW][START_NODE_COL];
     node.nodeType = "";
-    // console.log("start row, col = " +
-    //             START_NODE_ROW + " " +
-    //             START_NODE_COL + " and row = " +
-    //             row + " & col = " + col);
     grid[START_NODE_ROW][START_NODE_COL] = node;
     START_NODE_ROW = row;
     START_NODE_COL = col;

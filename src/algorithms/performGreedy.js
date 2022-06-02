@@ -5,6 +5,8 @@
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} startNode The grid's Start node
  * @param {Object<Node>} finishNode The grid's Finish node
+ * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  * @returns {Object[]<Node>} All visited nodes in order
  */
  export default function performGreedy(grid, startNode, finishNode, detourNode, hasDetour) {
@@ -58,12 +60,11 @@
 
         // condition where no path is possible
         if (closestNode.heuristicDistance === Infinity) return visitedNodes;
-        console.log("HERE")
+
         closestNode.isVisited = true;
         visitedNodes.push(closestNode);
 
         if (closestNode === finishNode) return visitedNodes;
-        console.log("HERE2")
         updateUnvisitedNeighbors(grid, closestNode, finishNode, detourNode, hasDetour);
     }
     return visitedNodes;
@@ -127,9 +128,11 @@ function getDistanceFromTarget(currentNode, targetNode) {
  * it is one node farther away fromt the start node.
  * Also sets the 'heurisitcDistance' for the currentNode 
  * 
+ * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} currentNode Node that was just visited 
  * @param {Object<Node>} finishNode The grid's Finish node
- * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  */
 function updateUnvisitedNeighbors(grid, currentNode, finishNode, detourNode, hasDetour) {
     const neighbors = getUnvisitedNeighbors(grid, currentNode);
@@ -148,8 +151,8 @@ function updateUnvisitedNeighbors(grid, currentNode, finishNode, detourNode, has
 /**
  * Returns all unvisited neighbors of currentNode
  * 
- * @param {Object<Node>} currentNode Node that was just visited 
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited 
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
 function getUnvisitedNeighbors(grid, currentNode) {

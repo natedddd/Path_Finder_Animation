@@ -15,6 +15,16 @@
     startNode.distance = 0;
     finishNode.heuristicDistance = 0;
 
+    // edge condition where the start and finish node are side-by-side
+    let neighbors = getUnvisitedNeighbors(grid, startNode);
+    neighbors = neighbors.filter(neighbor => neighbor.nodeType === "finish-node");
+    if (neighbors.length) {
+        finishNode.previousNode = startNode;
+        visitedNodes.push(startNode);
+        visitedNodes.push(finishNode);
+        return visitedNodes;
+    }
+
     while (unvisitedNodes.length > 0) {
         /******** Dikstra from startNode *********/
         sortNodesByDistance(unvisitedNodes);
@@ -29,9 +39,7 @@
 
         // case where the closestNode has been visited from the finishNode dijkstra
         if (closestNode.isVisitedByFinish) {
-            console.log("break 1")
-            console.log(closestNode)
-            connectShortestPaths(grid, closestNode, startNode);
+            connectShortestPaths(grid, closestNode);
             return visitedNodes;
         }
         
@@ -53,9 +61,7 @@
         
         // case where the closestNode has been visited from the startNode dijkstra
         if (closestNode.isVisited) {
-            console.log("break 2")
-            console.log(closestNode)
-            connectShortestPaths(grid, closestNode, startNode);
+            connectShortestPaths(grid, closestNode);
             return visitedNodes;
         }
 
@@ -105,25 +111,16 @@ function sortNodesByHeuristicDistance(unvisitedNodes) {
  * Increases the unvisited neighbor's 'distance' by 1 beacuse
  * it is one node farther away fromt the start node
  * 
- * @param {Object<Node>} currentNode Node that was just visited
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited
  */
 function updateUnvisitedNeighbors(grid, currentNode) {
     const neighbors = getUnvisitedNeighbors(grid, currentNode);
-    // console.log("in update unvisited")
-    // console.log(currentNode)
+    
     for (const neighbor of neighbors) {
         if (neighbor.isVisitedByFinish ||
             neighbor.isVisited) continue;
-        // if (neighbor.previousNode != null) continue;
-        if (neighbor.row === 11 && neighbor.col === 12) {
-            console.log("current node")
-            console.log(currentNode)
-            console.log("neighbor: ")
-            console.log(neighbor);
-            
-        }
-
+ 
         neighbor.distance = currentNode.distance + 1;
         neighbor.previousNode = currentNode;
     }
@@ -133,8 +130,8 @@ function updateUnvisitedNeighbors(grid, currentNode) {
  * Increases the unvisited neighbor's 'distance' by 1 beacuse
  * it is one node farther away fromt the start node
  * 
- * @param {Object<Node>} currentNode Node that was just visited
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited
  */
 function updateUnvisitedHeuristicNeighbors(grid, currentNode) {
     const neighbors = getUnvisitedHeuristicNeighbors(grid, currentNode);
@@ -142,15 +139,7 @@ function updateUnvisitedHeuristicNeighbors(grid, currentNode) {
     for (const neighbor of neighbors) {
         if (neighbor.isVisitedByFinish ||
             neighbor.isVisited) continue;
-        // if (neighbor.previousNode != null) continue;
-        if (neighbor.row === 11 && neighbor.col === 12) {
-            console.log("current node")
-            console.log(currentNode)
-            console.log("neighbor: ")
-            console.log(neighbor);
-
-        }
-
+       
         neighbor.heuristicDistance = currentNode.heuristicDistance + 1;
         neighbor.nextNode = currentNode;
     }
@@ -159,8 +148,8 @@ function updateUnvisitedHeuristicNeighbors(grid, currentNode) {
 /**
  * Returns all unvisited neighbors of currentNode
  * 
- * @param {Object<Node>} currentNode Node that was just visited 
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited 
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
 function getUnvisitedNeighbors(grid, currentNode) {
@@ -178,8 +167,8 @@ function getUnvisitedNeighbors(grid, currentNode) {
 /**
  * Returns all unvisited neighbors of currentNode
  * 
- * @param {Object<Node>} currentNode Node that was just visited 
  * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} currentNode Node that was just visited 
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
  function getUnvisitedHeuristicNeighbors(grid, currentNode) {
@@ -194,21 +183,22 @@ function getUnvisitedNeighbors(grid, currentNode) {
     return neighbors.filter(neighbor => !neighbor.isVisitedByFinish);
 }
 
-function connectShortestPaths(grid, closestNode, startNode) {
-    let closestNodePrevious = closestNode.previousNode;
-    console.log("Closest node");
-    console.log(closestNode);
-
+/**
+ * Connects the shortest path so that it can be visualize. 
+ * Works backwards along the Finish node's path from the middle
+ * connecting point (where the two Dijkstra's meet) back to the 
+ * Finish node
+ * 
+ * @param {Object[][]<Node>} grid The current grid state
+ * @param {Object<Node>} closestNode Node that was just visited 
+ */
+function connectShortestPaths(grid, closestNode) {
     let neighbors = getUnvisitedNeighbors(grid, closestNode);
     neighbors = neighbors.filter(neighbor => neighbor.isVisitedByFinish)
     sortNodesByHeuristicDistance(neighbors);
-    let finishPathNode = neighbors[0];
-
-    console.log("finish path node ");
-    console.log(finishPathNode);
 
     let nodeA = closestNode;
-    let nodeB = finishPathNode;
+    let nodeB = neighbors[0];
 
     if (nodeB.nodeType === "finish-node") {
         nodeB.previousNode = nodeA;
@@ -218,18 +208,9 @@ function connectShortestPaths(grid, closestNode, startNode) {
     while (nodeB.nextNode != null) {
         let temp = nodeB.nextNode;
         nodeB.previousNode = nodeA;
-
-        // if (temp === nodeA) {
-        //     nodeA = nodeB.nextNode.nextNode;
-        //     nodeB = temp;
-        // } else {
-            nodeA = nodeB;
-            nodeB = temp;
-        // }
-
-
+        nodeA = nodeB;
+        nodeB = temp;
         if (nodeB.nodeType === "finish-node") break;
-        // break;
     }
     nodeB.previousNode = nodeA;
 }
