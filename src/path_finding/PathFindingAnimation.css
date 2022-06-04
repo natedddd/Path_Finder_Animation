@@ -148,20 +148,21 @@ ul.gridItemsVisual {
 
 ul.gridItemsVisual li {
     color: var(--navbar-color);
-    font-size: 1.2vw;
+    font-size: 1.5vw;
     font-weight: 500;
     list-style: none;
-    margin: 0 1.5vw;
+    margin: 0 1.1vw;
+    padding: 0.2vw 0.2vw;
     display: flex;
 }
 
 .guideItem {
-    width: 1.5vw;
-    height: 1.5vw;
+    width: 1.9vw;
+    height: 1.9vw;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
-    margin: 0 0.5vw;
+    margin: 0 0.3vw;
 }
 #startNodeImg {   
     background-image: url("./imgs/startImg.png");
@@ -169,14 +170,23 @@ ul.gridItemsVisual li {
 #finishNodeImg {
     background-image: url("./imgs/finishImg.png");
 }
+#detourNodeImg {
+    background-image: url("./imgs/detourImg.png");
+}
 #unvisitedNodeImg {
     background-image: url("./imgs/unvisitedImg.png");
 }
 #visitedNodeImg {
     background-image: url("./imgs/visitedImg.png");
 }
+#visitedDetourNodeImg {
+    background-image: url("./imgs/visitedDetourImg.png");
+}
 #shortestPathNodeImg {
     background-image: url("./imgs/pathImg.png");
+}
+#overlapShortestPathNodeImg {
+    background-image: url("./imgs/overlapImg.png");
 }
 #wallNodeImg {
     background-image: url("./imgs/wallImg.png");

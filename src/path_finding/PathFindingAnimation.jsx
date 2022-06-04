@@ -20,7 +20,7 @@ let START_NODE_ROW = 12;
 let START_NODE_COL = 10; 
 let FINISH_NODE_ROW = 12; 
 let FINISH_NODE_COL = 14; 
-let DETOUR_NODE_ROW = 10;
+let DETOUR_NODE_ROW = 12;
 let DETOUR_NODE_COL = 20;
 
 /** Speed (SPD) determines animation speed */
@@ -276,18 +276,32 @@ export default class PathFindingAnimation extends Component {
      * @param {Object[]<Node>} mazeWalls 
      */
     animateMazeWalls(mazeWalls) {
-        const {grid, animationSpeed} = this.state;
+        const {grid, animationSpeed, hasDetour} = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        const detourNode = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[START_NODE_ROW][START_NODE_COL].nodeType = "start-node";
         grid[FINISH_NODE_ROW][FINISH_NODE_COL].nodeType = "finish-node";
 
+        if (hasDetour) {
+            grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node";
+            console.log("detoru")
+        }
+        console.log("test")
         for (let ii = 0; ii < mazeWalls.length; ii++) {
+            const node = mazeWalls[ii];
+
             setTimeout(() => {
-                const node = mazeWalls[ii];
                 if (node != startNode && node != finishNode) {
-                    document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
-                    grid[node.row][node.col].nodeType = "wall-node-maze";
+                    if (hasDetour) {
+                        if (node != detourNode) {
+                            document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
+                            grid[node.row][node.col].nodeType = "wall-node-maze";
+                        }
+                    } else {
+                        document.getElementById(`node-${node.row}-${node.col}`).className = 'node wall-node-maze';
+                        grid[node.row][node.col].nodeType = "wall-node-maze";
+                    }
                 } 
             }, ANIMATE_WALL_SPD * animationSpeed * ii);
         }
@@ -296,6 +310,9 @@ export default class PathFindingAnimation extends Component {
         }, ANIMATE_WALL_SPD * animationSpeed * mazeWalls.length);
     }
 
+    /**
+     * Handles adding the Detour node to the grid
+     */
     handleAddDetour() {
         let {grid} = this.state;
         let node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
@@ -304,8 +321,8 @@ export default class PathFindingAnimation extends Component {
         while (node === startNode || node === finishNode) {
             DETOUR_NODE_ROW++;
             DETOUR_NODE_COL++
-            node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         }
+        node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node"
         this.setState({grid: grid, hasDetour: true})
     }
@@ -372,18 +389,19 @@ export default class PathFindingAnimation extends Component {
      updateMazeDropdownName(mazeName) {
         if (!this.state.isReadyToAnimate) return;
         
-        const {grid, animationSpeed} = this.state;
+        const {grid, hasDetour} = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+        const detourNode = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         this.handleClearAllNodes();
         this.setState({isReadyToAnimate: false});
         let mazeWalls = [];
         
         document.querySelector('#mazeDropdownBtn').textContent = mazeName;
         if (mazeName === "Snake Pattern") {
-            mazeWalls = getSnakeMaze(grid, startNode, finishNode);
+            mazeWalls = getSnakeMaze(grid, startNode, finishNode, detourNode, hasDetour);
         } else if (mazeName === "Random Maze") {
-            mazeWalls = getRandomMaze(grid, startNode, finishNode);
+            mazeWalls = getRandomMaze(grid, startNode, finishNode, detourNode, hasDetour);
         } else if (mazeName === "Recursive Backtrack") {
             mazeWalls = getRecursiveBacktrackMaze(grid, startNode);
         } else {
@@ -453,9 +471,7 @@ export default class PathFindingAnimation extends Component {
      * @returns The new grid with the new Start or Finish node
      */
     getNewGridWithMovingStartOrFinish(grid, row, col, isMovingStart) {
-        if (row === START_NODE_ROW && col === START_NODE_COL) return grid;
-        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return grid;
-        if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) return grid;
+        if ( isStartFinishOrDetourNode(row, col) ) return grid;
 
         let newGrid = grid.slice();
         const tempNode = grid[row][col];
@@ -475,9 +491,7 @@ export default class PathFindingAnimation extends Component {
     }
     
     getNewGridWithMovingDetour(grid, row, col) {
-        if (row === START_NODE_ROW && col === START_NODE_COL) return grid;
-        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) return grid;
-        if (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) return grid;
+        if ( isStartFinishOrDetourNode(row, col) ) return grid;
 
         let newGrid = grid.slice();
         const tempNode = grid[row][col];
@@ -557,6 +571,11 @@ export default class PathFindingAnimation extends Component {
                                 <div onClick={() => this.updateSpeedDropdownName("Fast")}>Fast</div>
                             </div>
                         </div>
+                        <div className="navButton">
+                            <button className="button" onClick={() => this.handleAddDetour()}>
+                                Visit Github
+                            </button>
+                        </div>
                     </div>
                 </nav> {/* header */}
                 <div className="body"> 
@@ -564,27 +583,36 @@ export default class PathFindingAnimation extends Component {
                         <ul className="gridItemsVisual">
                             <li>
                                 <div className="guideItem" id="startNodeImg"></div>
-                                Start Node
+                                Start
                             </li>
                             <li>
                                 <div className="guideItem" id="finishNodeImg"></div>
-                                Finish Node
+                                Finish
                             </li>
                             <li>
                                 <div className="guideItem" id="unvisitedNodeImg"></div>
-                                Unvisited Node
+                                Unvisited
+                            </li>
+                            <li>
+                                <div className="guideItem" id="detourNodeImg"></div>
+                                Detour
                             </li>
                             <li>
                                 <div className="guideItem" id="visitedNodeImg"></div>
-                                Visited Node
+                                <div className="guideItem" id="visitedDetourNodeImg"></div>
+                                Visited
                             </li>
                             <li>
                                 <div className="guideItem" id="shortestPathNodeImg"></div>
-                                Shortest-path Node
+                                Shortest-path
+                            </li>
+                            <li>
+                                <div className="guideItem" id="overlapShortestPathNodeImg"></div>
+                                Overlapped Shortest-path
                             </li>
                             <li>
                                 <div className="guideItem" id="wallNodeImg"></div>
-                                Wall Node
+                                Wall
                             </li>
                         {/*  Need to add green for visited by detour and add orange for overlapping path */}
 
@@ -686,9 +714,7 @@ const createInitialGrid = () => {
  */
 const getNewGridWithWallToggled = (grid, row, col) => {
     // Cannot toggle wall on Start or Finish nodes
-    if ( (row === START_NODE_ROW && col === START_NODE_COL) ||
-         (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) ||
-         (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) )  return grid
+    if ( isStartFinishOrDetourNode(row, col) )  return grid
     console.log(
         "row is: " + row + " and col is: " + col
     )
@@ -802,4 +828,18 @@ function updateDetourNodePosition(grid, row, col) {
     DETOUR_NODE_ROW = row;
     DETOUR_NODE_COL = col;
     return grid;
+}
+
+/**
+ * Checks if the given row and col correspond to a Start, Finish, or Detour node
+ * 
+ * @param {number} row 
+ * @param {number} col 
+ * @returns True if the row & col corresponds to a Start, Finish, or Detour node
+ */
+function isStartFinishOrDetourNode(row, col) {
+    if ( (row === START_NODE_ROW && col === START_NODE_COL) ||
+         (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) ||
+         (row === DETOUR_NODE_ROW && col === DETOUR_NODE_COL) ) return true;
+    return false;
 }

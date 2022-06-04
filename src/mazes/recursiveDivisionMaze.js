@@ -85,6 +85,7 @@ function divide(grid, row, col, width, height, orientation, mazeWalls) {
     let directionCol = isHorizontal ? 1 : 0;
     let length = isHorizontal ? width : height
     
+    // draws the wall depending on where and the direction
     for (let ii = 0; ii < length; ii++) {
         if (newWallCol != passageCol || newWallRow != passageRow) {
             const node = grid[newWallRow-1][newWallCol-1];

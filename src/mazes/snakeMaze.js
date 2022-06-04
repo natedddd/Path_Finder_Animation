@@ -8,7 +8,7 @@ const ARBITRARY_LARGE_NUMBER = 1000;
  * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[]<Node>} All walls of the maze
  */
-export default function getSnakeMaze(grid, startNode, finishNode) {
+export default function getSnakeMaze(grid, startNode, finishNode, detourNode, hasDetour) {
     const mazeWalls = [];
     setGridBorderAsWalls(grid, mazeWalls);
     
@@ -16,6 +16,7 @@ export default function getSnakeMaze(grid, startNode, finishNode) {
         for (let jj = 1; jj < grid[0].length-1; jj++) {
             const node = grid[ii][jj];
             if (node === startNode || node === finishNode) continue;
+            if (hasDetour && node === detourNode) continue;
             if (node.row % 4 === 0) {
                 const isLastFourNodesInOddRow = (node.col / (grid[0].length-6) > 1) && ((node.row+4) % 8) === 0;
                 const isFirstFourNodesInEvenRow = node.col % ARBITRARY_LARGE_NUMBER < 5 && node.row % 8 === 0;
