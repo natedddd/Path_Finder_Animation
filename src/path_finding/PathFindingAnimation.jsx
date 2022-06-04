@@ -311,6 +311,22 @@ export default class PathFindingAnimation extends Component {
     }
 
     /**
+     * Handles adding or removing the Detour 
+     * node from the grid
+     */
+    handleDetourBtnClicked() {
+        const {hasDetour} = this.state;
+        
+        if (hasDetour) {
+            this.handleRemoveDetour();
+            document.querySelector('#detourBtn').textContent = `Add Detour`;
+        } else {
+            this.handleAddDetour();
+            document.querySelector('#detourBtn').textContent = `Remove Detour`;
+        }
+    }
+
+    /**
      * Handles adding the Detour node to the grid
      */
     handleAddDetour() {
@@ -325,6 +341,17 @@ export default class PathFindingAnimation extends Component {
         node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node"
         this.setState({grid: grid, hasDetour: true})
+    }
+
+    /**
+     * Handles removing the Detour node from the grid
+     */
+    handleRemoveDetour() {
+        let {grid} = this.state;
+        let node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
+        node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
+        grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = ""
+        this.setState({grid: grid, hasDetour: false})
     }
     
     /**
@@ -490,6 +517,15 @@ export default class PathFindingAnimation extends Component {
         return newGrid;
     }
     
+    /**
+     * Returns a new grid after changing a node to be the Detour
+     * node based on where the user moved it
+     * 
+     * @param {Object[][]<Node>} grid The current grid state
+     * @param {number} row The row of the node that is currently being set
+     * @param {number} col The col of the node that is currently being set
+     * @returns The new grid with the new Detour node
+     */
     getNewGridWithMovingDetour(grid, row, col) {
         if ( isStartFinishOrDetourNode(row, col) ) return grid;
 
@@ -542,7 +578,7 @@ export default class PathFindingAnimation extends Component {
                             </div>
                         </div>
                         <div className="navButton">
-                            <button className="button" onClick={() => this.handleAddDetour()}>
+                            <button className="button" id="detourBtn" onClick={() => this.handleDetourBtnClicked()}>
                                 Add Detour
                             </button>
                         </div>
