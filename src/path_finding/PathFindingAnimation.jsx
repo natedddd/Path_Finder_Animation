@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import Node from './node/Node'
-import { getNodesInShortestPathOrder, performDijkstra } from "../algorithms/performDijkstra";
+import performDijkstra from "../algorithms/performDijkstra";
 import performBiDijkstra from "../algorithms/performBiDijkstra";
 import performAStar from "../algorithms/performAStar";
 import performGreedy from "../algorithms/performGreedy";
@@ -9,6 +9,7 @@ import getSnakeMaze from "../mazes/snakeMaze";
 import getRandomMaze from "../mazes/randomMaze";
 import getRecursiveBacktrackMaze from "../mazes/recursiveBacktrackMaze";
 import getRecursiveDivisionMaze from "../mazes/recursiveDivisionMaze";
+import { getNodesInShortestPathOrder } from "../algorithms/commonAlgorithmFunctions";
 
 import './PathFindingAnimation.css'
 

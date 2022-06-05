@@ -6,11 +6,13 @@ const ARBITRARY_LARGE_NUMBER = 1000;
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} startNode The grid's Start node
  * @param {Object<Node>} finishNode The grid's Finish node
+ *  * @param {Object<Node>} detourNode The grid's Detour node
+ * @param {Boolean} hasDetour Indicates whether there is a detour node in the grid
  * @returns {Object[]<Node>} All walls of the maze
  */
 export default function getSnakeMaze(grid, startNode, finishNode, detourNode, hasDetour) {
     const mazeWalls = [];
-    setGridBorderAsWalls(grid, mazeWalls);
+    setBorderAsWalls(grid, mazeWalls);
     
     for (let ii = 1; ii < grid.length-1; ii++) {
         for (let jj = 1; jj < grid[0].length-1; jj++) {
@@ -40,7 +42,7 @@ export default function getSnakeMaze(grid, startNode, finishNode, detourNode, ha
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object[]<Node>} mazeWalls Array to store nodes set to walls
  */
-function setGridBorderAsWalls(grid, mazeWalls) {
+ function setBorderAsWalls(grid, mazeWalls) {
     for (let ii = 0; ii < grid[0].length; ii++) mazeWalls.push(grid[0][ii]); // top
     for (let ii = 0; ii < grid.length; ii++) mazeWalls.push(grid[ii][grid[0].length-1]); // right
     for (let ii = grid[0].length-1; ii > 0; ii--) mazeWalls.push(grid[grid.length-1][ii]); // bottom

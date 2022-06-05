@@ -1,3 +1,5 @@
+import * as commonAlgoFunc from "./commonAlgorithmFunctions";
+
 /**
  * Performs Dijkstra's algorithm to find the shortest
  * path from a Start to Finish node
@@ -9,14 +11,14 @@
  */
  export default function performBiDijkstra(grid, startNode, finishNode) {
     const visitedNodes = [];
-    const unvisitedNodes = getAllNodes(grid);
-    const unvisitedHeurisiticNodes = getAllNodes(grid);
+    const unvisitedNodes = commonAlgoFunc.getAllNodes(grid);
+    const unvisitedHeurisiticNodes = commonAlgoFunc.getAllNodes(grid);
     
     startNode.distance = 0;
     finishNode.heuristicDistance = 0;
 
     // edge condition where the start and finish node are side-by-side
-    let neighbors = getUnvisitedNeighbors(grid, startNode);
+    let neighbors = commonAlgoFunc.getUnvisitedNeighbors(grid, startNode);
     neighbors = neighbors.filter(neighbor => neighbor.nodeType === "finish-node");
     if (neighbors.length) {
         finishNode.previousNode = startNode;
@@ -27,7 +29,7 @@
 
     while (unvisitedNodes.length > 0) {
         /******** Dikstra from startNode *********/
-        sortNodesByDistance(unvisitedNodes);
+        commonAlgoFunc.sortNodesByDistance(unvisitedNodes);
         let closestNode = unvisitedNodes.shift();
         
         // if the closest node is a wall, skip visiting it
@@ -74,31 +76,6 @@
 }
 
 /**
- * Returns all of the nodes in the grid
- * 
- * @param {Object[][]<Node>} grid The current grid state
- * @returns {Object[]<Node>} All nodes in the grid
- */
-function getAllNodes(grid) {
-    const allNodes = [];
-    for (const row of grid) {
-        for (const node of row) {
-            allNodes.push(node);
-        }
-    }
-    return allNodes;
-}
-
-/**
- * Sorts the unvisited nodes in increasing distance from the start node
- * 
- * @param {Object[]<Node>} unvisitedNodes All unvisited nodes in the grid
- */
-function sortNodesByDistance(unvisitedNodes) {
-    unvisitedNodes.sort((nodeA, nodeB) => nodeA.distance - nodeB.distance);
-}
-
-/**
  * Sorts the unvisited nodes in increasing heurisitic distance from the finish node
  * 
  * @param {Object[]<Node>} unvisitedNodes All unvisited nodes in the grid
@@ -115,7 +92,7 @@ function sortNodesByHeuristicDistance(unvisitedNodes) {
  * @param {Object<Node>} currentNode Node that was just visited
  */
 function updateUnvisitedNeighbors(grid, currentNode) {
-    const neighbors = getUnvisitedNeighbors(grid, currentNode);
+    const neighbors = commonAlgoFunc.getUnvisitedNeighbors(grid, currentNode);
     
     for (const neighbor of neighbors) {
         if (neighbor.isVisitedByFinish ||
@@ -152,25 +129,6 @@ function updateUnvisitedHeuristicNeighbors(grid, currentNode) {
  * @param {Object<Node>} currentNode Node that was just visited 
  * @returns {Object[]<Node>} All unvisited neighbors of currentNode
  */
-function getUnvisitedNeighbors(grid, currentNode) {
-    let neighbors = []; 
-    const {row, col} = currentNode;
-
-    if (col < grid[0].length-1) neighbors.push(grid[row][col+1]); // right
-    if (row > 0) neighbors.push(grid[row-1][col]); // top 
-    if (col > 0) neighbors.push(grid[row][col-1]); // left
-    if (row < grid.length-1) neighbors.push(grid[row+1][col]); // bottom
-
-    return neighbors.filter(neighbor => !neighbor.isVisited);
-}
-
-/**
- * Returns all unvisited neighbors of currentNode
- * 
- * @param {Object[][]<Node>} grid The current grid state
- * @param {Object<Node>} currentNode Node that was just visited 
- * @returns {Object[]<Node>} All unvisited neighbors of currentNode
- */
  function getUnvisitedHeuristicNeighbors(grid, currentNode) {
     const neighbors = []; 
     const {row, col} = currentNode;
@@ -193,7 +151,7 @@ function getUnvisitedNeighbors(grid, currentNode) {
  * @param {Object<Node>} closestNode Node that was just visited 
  */
 function connectShortestPaths(grid, closestNode) {
-    let neighbors = getUnvisitedNeighbors(grid, closestNode);
+    let neighbors = commonAlgoFunc.getUnvisitedNeighbors(grid, closestNode);
     neighbors = neighbors.filter(neighbor => neighbor.isVisitedByFinish)
     sortNodesByHeuristicDistance(neighbors);
 

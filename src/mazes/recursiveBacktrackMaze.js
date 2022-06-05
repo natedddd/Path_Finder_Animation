@@ -4,7 +4,6 @@
  * 
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} startNode The grid's Start node
- * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[]<Node>} All walls of the maze
  */
 export default function getRecursiveBacktrackMaze(grid, startNode) {
@@ -45,7 +44,6 @@ function setAllNodesAsWall(grid) {
  * 
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object<Node>} startNode The grid's Start node
- * @param {Object<Node>} finishNode The grid's Finish node
  * @returns {Object[][]<Node>} An updated grid 
  */
 function recursivelyDivide(grid, startNode) {

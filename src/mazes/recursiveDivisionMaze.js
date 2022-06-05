@@ -20,7 +20,10 @@ export default function getRecursiveDivisionMaze(grid) {
     const orientation = choose_orientation(gridWidth, gridHeight);
     let mazeWalls = [];
     setBorderAsWalls(grid, mazeWalls);
+    
+    // 1, 1 corresponds to row, col = 1. This is the upper left most point of the current rectangle being divided
     mazeWalls = mazeWalls.concat(divide(grid, 1, 1, gridWidth, gridHeight, orientation, mazeWalls)); // 1, 1 for row, col = 1
+
     mazeWalls.pop(); // removes an empty Object from the mazeWalls
     return mazeWalls;
 }
@@ -31,7 +34,7 @@ export default function getRecursiveDivisionMaze(grid) {
  * @param {Object[][]<Node>} grid The current grid state
  * @param {Object[]<Node>} mazeWalls Array to store nodes set to walls
  */
-function setBorderAsWalls(grid, mazeWalls) {
+ function setBorderAsWalls(grid, mazeWalls) {
     for (let ii = 0; ii < grid[0].length; ii++) mazeWalls.push(grid[0][ii]); // top
     for (let ii = 0; ii < grid.length; ii++) mazeWalls.push(grid[ii][grid[0].length-1]); // right
     for (let ii = grid[0].length-1; ii > 0; ii--) mazeWalls.push(grid[grid.length-1][ii]); // bottom
@@ -41,6 +44,10 @@ function setBorderAsWalls(grid, mazeWalls) {
 /**
  * Recursively divideds the grid in smaller sections by adding walls
  * until the seconds cannot get any smaller
+ * 
+ * Generates a new wall between the top left most point in the current sub-grid that
+ * is being divided. Generates the wall between the given width and height bounds for the
+ * sub-grid.
  * 
  * @param {Object[][]<Node>} grid The current grid state
  * @param {number} row The top most row of the current rectangle being divided 
