@@ -68,6 +68,10 @@
     background-color: var(--navbar-hover-color);
 }
 
+.button.unavailable:hover {
+    color: red;
+    background-color: var(--navbar-color);
+}
 .dropdown {
     position: relative;
     display: flex;

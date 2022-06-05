@@ -283,11 +283,8 @@ export default class PathFindingAnimation extends Component {
         grid[START_NODE_ROW][START_NODE_COL].nodeType = "start-node";
         grid[FINISH_NODE_ROW][FINISH_NODE_COL].nodeType = "finish-node";
 
-        if (hasDetour) {
-            grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node";
-            console.log("detoru")
-        }
-        console.log("test")
+        if (hasDetour) grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node";
+
         for (let ii = 0; ii < mazeWalls.length; ii++) {
             const node = mazeWalls[ii];
 
@@ -315,14 +312,15 @@ export default class PathFindingAnimation extends Component {
      * node from the grid
      */
     handleDetourBtnClicked() {
-        const {hasDetour} = this.state;
+        const {hasDetour, currentAlgo} = this.state;
         
+        if (currentAlgo === "bi-dijkstra") return;
+        console.log(currentAlgo)
+
         if (hasDetour) {
             this.handleRemoveDetour();
-            document.querySelector('#detourBtn').textContent = `Add Detour`;
         } else {
             this.handleAddDetour();
-            document.querySelector('#detourBtn').textContent = `Remove Detour`;
         }
     }
 
@@ -340,6 +338,7 @@ export default class PathFindingAnimation extends Component {
         }
         node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node"
+        document.querySelector('#detourBtn').textContent = `Remove Detour`;
         this.setState({grid: grid, hasDetour: true})
     }
 
@@ -351,6 +350,7 @@ export default class PathFindingAnimation extends Component {
         let node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = ""
+        document.querySelector('#detourBtn').textContent = `Add Detour`;
         this.setState({grid: grid, hasDetour: false})
     }
     
@@ -403,6 +403,13 @@ export default class PathFindingAnimation extends Component {
             default:
                 console.log("Error: Invalid algorithm in updateAlgoDropdownName()");
                 break;
+        }
+        // Add because there is no Detour feature for bi-directional Dijkstra
+        if (algorithmName === "bi-dijkstra") {
+            document.querySelector('#detourBtn').className = "button unavailable";
+            this.handleRemoveDetour();
+        } else {
+            document.querySelector('#detourBtn').className = "button";
         }
         this.setState({currentAlgo: algorithmName});
     }
@@ -608,9 +615,11 @@ export default class PathFindingAnimation extends Component {
                             </div>
                         </div>
                         <div className="navButton">
-                            <button className="button" onClick={() => this.handleAddDetour()}>
-                                Visit Github
-                            </button>
+                            <a href="https://github.com/natedddd/Path_Finder_Animation" target="_blank">
+                                <button className="button">
+                                    Visit Github
+                                </button>
+                            </a>
                         </div>
                     </div>
                 </nav> {/* header */}
