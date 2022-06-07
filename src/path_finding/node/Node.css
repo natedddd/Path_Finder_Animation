@@ -4,7 +4,7 @@
 
 .node {
     width: 1.4vw;
-    height: 1.4vw;
+    height: calc(1.6vw * 0.9);
     outline: 1px solid gray;
     display: inline-block;
     background-color: white;

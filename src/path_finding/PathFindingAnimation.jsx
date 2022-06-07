@@ -13,6 +13,14 @@ import { getNodesInShortestPathOrder } from "../algorithms/commonAlgorithmFuncti
 
 import './PathFindingAnimation.css'
 
+/**** Importing images ****/
+import modalImg1 from './imgs/introImg1.png'
+import modalImg2 from './imgs/pathfindingImg.jpg'
+import modalImg3 from './imgs/algorithmList.png'
+import modalImg4 from './imgs/visualizeImg.png'
+import draggingClip from './imgs/draggingNodes.mp4'
+import draggingPath from './imgs/draggingPath.mp4'
+
 const NUM_OF_GRID_ROWS = 25;
 const NUM_OF_GRID_COLS = 59;
 
@@ -20,9 +28,9 @@ const NUM_OF_GRID_COLS = 59;
 let START_NODE_ROW = 12; 
 let START_NODE_COL = 10; 
 let FINISH_NODE_ROW = 12; 
-let FINISH_NODE_COL = 14; 
-let DETOUR_NODE_ROW = 12;
-let DETOUR_NODE_COL = 20;
+let FINISH_NODE_COL = 48; 
+let DETOUR_NODE_ROW = 5;
+let DETOUR_NODE_COL = 29;
 
 /** Speed (SPD) determines animation speed */
 const ANIMATE_DEFAULT_ALGO_SPD = 10;
@@ -55,6 +63,7 @@ export default class PathFindingAnimation extends Component {
             currentAlgo: "dijkstra",
             animationSpeed: FAST_SPD,
             hasDetour: false,
+            currentModalPage: 1,
         };
     }
 
@@ -65,6 +74,7 @@ export default class PathFindingAnimation extends Component {
     componentDidMount() {
         const grid = createInitialGrid();
         this.setState({grid});
+        // handleDisplayIntroModal();
     }
 
     /**
@@ -550,6 +560,19 @@ export default class PathFindingAnimation extends Component {
         return newGrid;
     }
 
+    handleDisplayNextModal() {
+        const {currentModalPage} = this.state;
+        displayNextModal(currentModalPage+1)
+
+        this.setState({currentModalPage: currentModalPage+1})
+    }
+
+    handleDisplayIntroModal() {
+        this.setState({currentModalPage: 1});
+        displayIntroModal();
+        displayNextModal(1)
+    }
+
     /**
      * Renders the HTML and the grid used for the path finding animation
      * Initializes event handlers 
@@ -561,10 +584,14 @@ export default class PathFindingAnimation extends Component {
             <>  
                 <nav className="header">
                     <div className="navbar">
-                        <div className="title">Pathfinding Visualizer</div>
-                        <div className="dropdown" id="algoDropdownDiv" onClick={() => this.toggleDropdown("algoDropdownDiv")}>
+                        <div className="title">
+                            <button className="modal-open-btn" onClick={() => this.handleDisplayIntroModal()}>
+                                Pathfinding Visualizer
+                            </button>
+                        </div>
+                        <div className="dropdown large" id="algoDropdownDiv" onClick={() => this.toggleDropdown("algoDropdownDiv")}>
                             <button className="button" id="algoDropdownBtn">
-                                Dijkstra's Algorithm
+                                    Dijkstra's <br></br>Algorithm
                             </button>
                             <div className="option" id="algoOptions">
                                 <div onClick={() => this.updateAlgoDropdownName("Dijkstra's Algorithm")}>Dijkstra's Algorithm</div>
@@ -574,7 +601,7 @@ export default class PathFindingAnimation extends Component {
                                 <div onClick={() => this.updateAlgoDropdownName("Recursive Search")}>Recursive Search</div>
                             </div>
                         </div>
-                        <div className="dropdown" id="mazeDropdownDiv" onClick={() => this.toggleDropdown("mazeDropdownDiv")}>
+                        <div className="dropdown large" id="mazeDropdownDiv" onClick={() => this.toggleDropdown("mazeDropdownDiv")}>
                             <button className="button" id="mazeDropdownBtn">
                                 Maze Options
                             </button>
@@ -616,7 +643,7 @@ export default class PathFindingAnimation extends Component {
                             </div>
                         </div>
                         <div className="navButton">
-                            <a href="https://github.com/natedddd/Path_Finder_Animation" target="_blank">
+                            <a href="https://github.com/natedddd/Path_Finder_Animation" target="_blank" id="githubBtn">
                                 <button className="button">
                                     Visit Github
                                 </button>
@@ -624,7 +651,10 @@ export default class PathFindingAnimation extends Component {
                         </div>
                     </div>
                 </nav> {/* header */}
+                
                 <div className="body"> 
+
+                    {/**** Grid Visual Guide ****/}
                      <div className="visualizerGuide">
                         <ul className="gridItemsVisual">
                             <li>
@@ -660,10 +690,10 @@ export default class PathFindingAnimation extends Component {
                                 <div className="guideItem" id="wallNodeImg"></div>
                                 Wall
                             </li>
-                        {/*  Need to add green for visited by detour and add orange for overlapping path */}
-
                         </ul>
                     </div>
+
+                    {/**** Counters ****/}
                     <div className="counterWrapper">
                         <div className="counterDiv" id="visitedCounter">
                             Visited Nodes = 0
@@ -673,7 +703,36 @@ export default class PathFindingAnimation extends Component {
                         </div>
                     </div> 
 
+                    {/**** Modal ****/}
+                    <div className="modal" id="intro-modal">
+                        <div className="modal-header">
+                            <div id="modal-title">Welcome to Pathfinding Visualizer!</div>
+                            <button className="modal-close-btn" onClick={() => this.handleDisplayIntroModal()}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <p className="subtitle" id="modal-subtitle">
+                                Welcome to a quick introduction to this website.<br></br>
+                            </p>
+                            <p id="modal-body-text">
+                                This tutorial can always be found by clicking the<br></br>
+                                "Pathfinding Visualizer" title in the top left of the screen.<br></br>
+                                <br></br>
+                                Feel free to skip this intro and start exploring!
+                            </p>
+                            <img src={modalImg1} id="modal-img"/>
+                        </div>
+                        <video src={draggingClip} id="modal-vid" width="0" height="0" autoPlay loop></video>
+                        <div className="modal-footer">
+                            <button className="modal-nav-btn" id="modal-finish-btn" onClick={() => this.handleDisplayIntroModal()}>Show Me Paths!</button>
+                            {/* <button className="modal-nav-btn" id="modal-next-btn" onClick={() => handleDisplayNextModal(2)}>Previous</button> */}
+                            <p id="modal-progress">1/6</p>
+                            <button className="modal-nav-btn" id="modal-next-btn" onClick={() => this.handleDisplayNextModal(2)}>Next, Please!</button>
+                        </div>
+                    </div>
+                    <div id="overlay"></div>
 
+
+                    {/**** Grid ****/}
                     <div className="grid">
                         {grid.map((row, rowIdx) => {
                             return (
@@ -708,11 +767,120 @@ export default class PathFindingAnimation extends Component {
     }
 }
 
+function displayIntroModal() {
+    const modal = document.querySelector('#intro-modal')
+    const overlay = document.querySelector('#overlay')
+    
+    modal.classList.toggle('active')
+    overlay.classList.toggle('active')
+}
+
+function displayNextModal(id) {
+    const title = document.querySelector('#modal-title');
+    const bodySubtitle = document.querySelector('#modal-subtitle');
+    const bodyText = document.querySelector('#modal-body-text');
+    const bodyImg = document.querySelector('#modal-img')
+    const bodyVid = document.querySelector('#modal-vid')
+    const nextBtn = document.querySelector('#modal-next-btn')
+    const progressCount = document.querySelector('#modal-progress')
+
+    switch(id) {
+        case 1:
+            console.log("in case 1")
+            title.textContent = "Welcome to Pathfinding Visualizer!"
+            bodySubtitle.textContent = "Welcome to a quick introduction to this website.\n";
+            bodyText.textContent =  "This tutorial can always be found by clicking the \n" + 
+                                    "\'Pathfinding Visualizer\' title in the top left of the screen.\n\n" +
+                                    "Feel free to skip this intro and start exploring! \n" ;
+            bodyImg.src = modalImg1;
+            bodyImg.style.width = "80%";
+            bodyImg.style.height = "18vw";
+            progressCount.textContent = "1/6";
+            bodyVid.style.width = "0";
+            bodyVid.style.height = "0";
+            break;
+        case 2:
+            title.textContent = "What is Pathfinding?"
+            bodySubtitle.textContent = "Pathfinding is the plotting of a route between two\n" +
+                                        "points. This application visualizes this process\n" +
+                                        "with a variety of different pathfinding algorithms."
+            bodyText.textContent =  "All of the algorithms on this site are adapted for a 2D\n" + 
+                                    "grid, although they can be applied in many different \n" +
+                                    "ways beyond a grid. For this application, each neighbor \n" +
+                                    "of a certain \"node\" have a cost of 1 to visit them, so \n" +
+                                    "nodes that are farther away are more expensive to visit."
+            bodyImg.src = modalImg2;
+            bodyImg.style.width = "80%";
+            bodyImg.style.height = "18vw";
+            progressCount.textContent = "2/6";
+            break;
+        case 3:
+            title.textContent = "How to Get Started"
+            bodySubtitle.textContent = "Start by selecting an algorithm from the options.\n" +
+                                        "Dijkstra Algorithm is selected by default\n"
+            bodyText.textContent =  "These algorithms are all a bit different. Some use no \n" + 
+                                    "heurisitcs, while others are very heuristic heavy. \n\n" +
+                                    "And some algorithms don't even find the fastest path! \n"
+            bodyImg.src = modalImg3;
+            bodyImg.style.width = "45%";
+            bodyImg.style.height = "20vw";
+            progressCount.textContent = "3/6";
+            break;
+        case 4:
+            title.textContent = "Adding Walls and Moving Nodes";
+            bodySubtitle.textContent = "Click and drag to add walls. It's that easy!\n" ;
+            bodyText.textContent =  "Guess how to move nodes... click and drag? Yes! \n\n"+
+                                    "Remove nodes? Click and drag? Wow, you're good. \n";
+            bodyImg.style.width = "0";
+            bodyImg.style.height = "0";
+            bodyVid.src = draggingClip;
+            bodyVid.style.width = "100%";
+            bodyVid.style.height = "15vw";
+            progressCount.textContent = "4/6";
+            break;
+        case 5:
+            title.textContent = "Draggable Start, Finish, and Detour";
+            bodySubtitle.textContent = "Click and drag the Start, Finish, or Detour node \n" +
+                                        "to instantly see a new path visualized! Neat! \n" ;
+            bodyText.textContent =  "This is my favorite feature. It let's you see a new \n"+
+                                    "path instantly! Although, the animation is cool too.\n";
+            bodyImg.style.width = "0";
+            bodyImg.style.height = "0";
+            bodyVid.src = draggingPath;
+            bodyVid.style.width = "70%";
+            bodyVid.style.height = "15vw";
+            progressCount.textContent = "5/6";
+            break;
+        case 6:
+            title.textContent = "Thanks! Have Fun Exploring!";
+            bodySubtitle.textContent = "Check out the Maze options and don't forget to \n" +
+                                        "play with the Detour node! It's cool too. \n" ;
+            bodyText.textContent =  "Click the \"Visualize\" button to see the algrithmic action. \n\n" +
+                                    "Thanks! That's all folks! \n\n"
+            bodyImg.src = modalImg4;
+            bodyImg.style.width = "50%";
+            bodyImg.style.height = "9vw";
+            bodyVid.src = draggingPath;
+            bodyVid.style.width = "0";
+            bodyVid.style.height = "0";
+            progressCount.textContent = "5/6";
+
+            nextBtn.textContent = "Okay, Finish!"
+            progressCount.textContent = "6/6";
+            break;
+        case 7:
+            displayIntroModal();
+        default:
+            console.log("Error in handleDisplayNextModal(). Invalid modal ID");
+            break;
+    }
+}
+
 /**
  * Creates a node
  * 
- * @param {*} row The row of the node that is currently being created
- * @param {*} col The col of the node that is currently being created
+ * @param {number} row The row of the node that is currently being created
+ * @param {number} col The col of the node that is currently being created
  * @returns {<Node>} Returns the created node
  */
 const createNode = (row, col) => {

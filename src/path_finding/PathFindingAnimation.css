@@ -7,14 +7,17 @@
     position: relative;
 }
 
+/**** Navbar styles ****/
 .navbar {
     position: relative;
     width: 100%;
+    height: 6vh;
     min-height: 50px;
     background-color: var(--navbar-color);
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0.5vw;
 }
 
 .title {
@@ -25,17 +28,18 @@
     width: 10vw;
 }
 
-.navButton {
+.dropdown {
     position: relative;
-    margin: 1vw 0vw;
-    width: 14vw;
-    height: 5vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: var(--navbar-color);
-    border: none;
-    outline: none;
+    width: 13vw;
+    height: 100%
+}
+
+.dropdown.large {
+    width: 12vw;
 }
 
 .button {
@@ -51,6 +55,27 @@
     border-radius: 10px;
 }
 
+.button:hover {
+    background-color: var(--navbar-hover-color);
+}
+
+.button.unavailable:hover {
+    color: red;
+    background-color: var(--navbar-color);
+}
+
+.navButton {
+    position: relative;
+    margin: 0.5vw 0vw;
+    width: 10vw;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--navbar-color);
+    border: none;
+    outline: none;
+}
 
 #visualizebtn {
     background-color: var(--navbar-hover-color);
@@ -62,28 +87,6 @@
 
 #visualizebtn:hover {
     font-size: 2vw;
-}
-
-.button:hover {
-    background-color: var(--navbar-hover-color);
-}
-
-.button.unavailable:hover {
-    color: red;
-    background-color: var(--navbar-color);
-}
-.dropdown {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--navbar-color);
-    width: 16vw;
-    height: 5vh;
-}
-
-#algoDropdownDiv {
-    width: 16.5vw;
 }
 
 .dropdown::before { 
@@ -103,17 +106,27 @@
 }
 
 .dropdown.active::before {
-    top: 17px;
+    top: 2.3vh;
     transform: rotate(135deg);
     transition: 0.5s;
     pointer-events: none;
+}
+
+.dropdown .option div {
+    padding: 12px 20px;
+    cursor: pointer;
+}
+
+.dropdown .option div:hover {
+    background: rgb(7, 44, 124);
+    color: white
 }
 
 #algoDropdownDiv .option, 
 #mazeDropdownDiv .option,
 #speedDropdownDiv .option {
     position: absolute;
-    top: 6.5vh;
+    top: 6.7vh;
     width: 100%;
     background: white;
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
@@ -128,17 +141,15 @@
     display: block;
 }
 
-.dropdown .option div {
-    padding: 12px 20px;
-    cursor: pointer;
+#githubBtn {
+    width: 100%;
+    height: 100%;
 }
 
-.dropdown .option div:hover {
-    background: rgb(7, 44, 124);
-    color: white
-}
 
-/* Body styles begin */
+/**** BODY STLES ****/
+
+/**** Node visualizer guide ****/
 .visualizerGuide {
     display: flex;
     justify-content: center;
@@ -152,7 +163,7 @@ ul.gridItemsVisual {
 
 ul.gridItemsVisual li {
     color: var(--navbar-color);
-    font-size: 1.5vw;
+    font-size: 1.2vw;
     font-weight: 500;
     list-style: none;
     margin: 0 1.1vw;
@@ -161,8 +172,8 @@ ul.gridItemsVisual li {
 }
 
 .guideItem {
-    width: 1.9vw;
-    height: 1.9vw;
+    width: 1.6vw;
+    height: 1.6vw;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
@@ -196,7 +207,7 @@ ul.gridItemsVisual li {
     background-image: url("./imgs/wallImg.png");
 }
 
-/* Begin counter divs */
+/**** Counter styles ****/
 .counterWrapper {
     color: var(--navbar-color);
     display: flex;
@@ -214,7 +225,138 @@ ul.gridItemsVisual li {
     font-weight: 600;
 }
 
-/* Grid styles begin */
+/**** Tutorial styles ****/
+.modal-open-btn {
+    border: none;
+    font-family: sans-serif; 
+    font-size: 1.5vw;
+    line-height: 1;
+    font-weight: bold;
+    background: transparent;
+    color: white;
+    border-radius: 10px;
+}
+
+.modal {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: 200ms ease-in-out;
+    border: 1px solid black;
+    border-radius: 10px;
+    z-index: 10;
+    background-color: white;
+    width: 40vw;
+    height: 50vw;
+    max-width: 80%;
+    max-height: 80%;
+    min-width: 300px;
+    min-height: 300px;
+
+    white-space: pre;
+}
+
+.modal.active {
+    transform: translate(-50%, -50%) scale(1);
+    transition: 200ms ease-in-out;
+}
+
+.modal-header {
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid black;
+    background-color: var(--navbar-color);
+    color: white;
+}
+
+.modal-header #modal-title {
+    font-size: 2vw;
+    font-weight: bold;
+}
+
+.modal-header .modal-close-btn {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 2vw;
+    font-weight: bold;
+    color: white
+}
+
+.modal-body {
+    font-size: 1.5vw;
+    padding: 10px 15px;
+}
+
+.modal-footer {
+    position: absolute;
+    border-top: 1.5px solid black;
+    bottom: 0;
+    width: 98%;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    background-color: var(--navbar-color);
+}
+
+.modal-nav-btn {
+    border: none;
+    font-family: sans-serif; 
+    font-size: 1.5vw;
+    line-height: 1;
+    font-weight: bold;
+    background: transparent;
+    color: white;
+    border-radius: 10px;
+    height: 2.5vw;
+}
+
+.modal-nav-btn:hover {
+    color: var(--navbar-hover-color)
+}
+
+#modal-progress {
+    font-size: 1.5vw;
+    font-weight: bold;
+    background: transparent;
+    color: white;
+    border-radius: 10px;
+    padding: 0.4vw;
+    margin: 0;
+}
+
+#modal-subtitle {
+    font-size: 1.7vw;
+    font-weight: 500;
+}
+
+#modal-img {
+    margin: 1vw 0;
+    width: 100%;
+    height: 21vw;
+}
+
+#overlay {
+    position: fixed;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+#overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/**** Grid styles ****/
 .grid {
     position: absolute;
     margin: 0vw 8.5vw;
