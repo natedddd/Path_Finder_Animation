@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/Path_Finder_Animation/static/css/main.5bf9d218.css",
+    "main.js": "/Path_Finder_Animation/static/js/main.5bfb192f.js",
+    "static/js/787.b57b26d9.chunk.js": "/Path_Finder_Animation/static/js/787.b57b26d9.chunk.js",
+    "static/media/draggingNodes.mp4": "/Path_Finder_Animation/static/media/draggingNodes.8595caf7206b9ec6960a.mp4",
+    "static/media/draggingPath.mp4": "/Path_Finder_Animation/static/media/draggingPath.49d3cda88df7ce320699.mp4",
+    "static/media/introImg1.png": "/Path_Finder_Animation/static/media/introImg1.ab7d5ee7177fddd2cf43.png",
+    "static/media/pathfindingImg.jpg": "/Path_Finder_Animation/static/media/pathfindingImg.87d64c0fef4e1feafc45.jpg",
+    "static/media/algorithmList.png": "/Path_Finder_Animation/static/media/algorithmList.d831efb5374a3ac26d15.png",
+    "static/media/logo.svg": "/Path_Finder_Animation/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/Path_Finder_Animation/index.html",
+    "main.5bf9d218.css.map": "/Path_Finder_Animation/static/css/main.5bf9d218.css.map",
+    "main.5bfb192f.js.map": "/Path_Finder_Animation/static/js/main.5bfb192f.js.map",
+    "787.b57b26d9.chunk.js.map": "/Path_Finder_Animation/static/js/787.b57b26d9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5bf9d218.css",
+    "static/js/main.5bfb192f.js"
+  ]
+}
