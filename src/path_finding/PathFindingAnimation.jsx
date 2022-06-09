@@ -72,12 +72,9 @@ export default class PathFindingAnimation extends Component {
      * Finish node and updates the grid state
      */
     componentDidMount() {
-        console.log("0")
         const grid = createInitialGrid();
         this.setState({grid});
-        console.log("1")
         displayIntroModal();
-        console.log("2")
     }
 
     /**
@@ -329,7 +326,6 @@ export default class PathFindingAnimation extends Component {
         const {hasDetour, currentAlgo} = this.state;
         
         if (currentAlgo === "bi-dijkstra") return;
-        console.log(currentAlgo)
 
         if (hasDetour) {
             this.handleRemoveDetour();
@@ -574,9 +570,6 @@ export default class PathFindingAnimation extends Component {
         this.setState({currentModalPage: 1});
         displayIntroModal();
         displayNextModal(1)
-        console.log(
-            "test"
-        )
     }
 
     /**
@@ -792,7 +785,6 @@ function displayNextModal(id) {
 
     switch(id) {
         case 1:
-            console.log("in case 1")
             title.textContent = "Welcome to Pathfinding Visualizer!"
             bodySubtitle.textContent = "Welcome to a quick introduction to this website.\n";
             bodyText.textContent =  "This tutorial can always be found by clicking the \n" + 
@@ -935,9 +927,9 @@ const createInitialGrid = () => {
 const getNewGridWithWallToggled = (grid, row, col) => {
     // Cannot toggle wall on Start or Finish nodes
     if ( isStartFinishOrDetourNode(row, col) )  return grid
-    console.log(
-        "row is: " + row + " and col is: " + col
-    )
+    // console.log(
+    //     "row is: " + row + " and col is: " + col
+    // )
     const newGrid = grid.slice();
     const tempNode = grid[row][col];
     const newNode = {
