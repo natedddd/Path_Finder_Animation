@@ -74,7 +74,9 @@ export default class PathFindingAnimation extends Component {
     componentDidMount() {
         const grid = createInitialGrid();
         this.setState({grid});
-        // handleDisplayIntroModal();
+        console.log("1")
+        this.handleDisplayIntroModal();
+        console.log("2")
     }
 
     /**
@@ -571,6 +573,9 @@ export default class PathFindingAnimation extends Component {
         this.setState({currentModalPage: 1});
         displayIntroModal();
         displayNextModal(1)
+        console.log(
+            "test"
+        )
     }
 
     /**
