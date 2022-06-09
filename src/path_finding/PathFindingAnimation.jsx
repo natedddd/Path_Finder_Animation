@@ -72,10 +72,11 @@ export default class PathFindingAnimation extends Component {
      * Finish node and updates the grid state
      */
     componentDidMount() {
+        console.log("0")
         const grid = createInitialGrid();
         this.setState({grid});
         console.log("1")
-        this.handleDisplayIntroModal();
+        displayIntroModal();
         console.log("2")
     }
 
