@@ -414,6 +414,7 @@ export default class PathFindingAnimation extends Component {
                 console.log("Error: Invalid algorithm in updateAlgoDropdownName()");
                 break;
         }
+        updateAlgorithmDescription(algorithmName)
         // Add because there is no Detour feature for bi-directional Dijkstra
         if (algorithmName === "bi-dijkstra") {
             document.querySelector('#detourBtn').className = "button unavailable";
@@ -730,6 +731,10 @@ export default class PathFindingAnimation extends Component {
                     </div>
                     <div id="overlay"></div>
 
+                    {/**** Modal ****/}
+                    <div id="algorithmDescription">
+                        Dijkstra's Algorithm is <span>guaranteed</span> to find the shortest path!
+                    </div>
 
                     {/**** Grid ****/}
                     <div className="grid">
@@ -872,6 +877,31 @@ function displayNextModal(id) {
             console.log("Error in handleDisplayNextModal(). Invalid modal ID");
             break;
     }
+}
+
+function updateAlgorithmDescription(algorithmName) {
+    const label = document.querySelector('#algorithmDescription')
+    switch(algorithmName) {
+        case "dijkstra":
+            label.innerHTML = "Dijkstra's Algorithm is <span>guaranteed</span> to find the shortest path!"
+            break;
+        case "bi-dijkstra":
+            label.innerHTML = "Bi-directional Dijkstra's Algorithm is <span>guaranteed</span> to find the shortest path!"
+            break;
+        case "a*":
+            label.innerHTML = "A* Search is <span>guaranteed</span> to find the shortest path!"
+            break;
+        case "greedy":
+            label.innerHTML = "Greedy Best-First is <span>not guaranteed</span> to find the shortest path!"
+            break;
+        case "recursiveSearch":
+            label.innerHTML = "Recursive Search is <span>not guaranteed</span> to find the shortest path!"
+            break;
+        default:
+            console.log("Error: Invalid algorithm in updateAlgorithmDescription()");
+            break;
+    }
+
 }
 
 /**

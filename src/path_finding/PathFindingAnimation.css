@@ -356,6 +356,17 @@ ul.gridItemsVisual li {
     pointer-events: all;
 }
 
+/**** Algorithm Label ****/
+#algorithmDescription {
+    font-size: 1.5vw;
+    margin: 0.5vw 0 0.8vw;
+}
+
+span {
+    font-weight: bold;
+    font-style: italic;
+}
+
 /**** Grid styles ****/
 .grid {
     position: absolute;
