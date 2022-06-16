@@ -4,7 +4,7 @@ I built this Pathfinding Visualizer because I was amazed at how cool it was to c
 
 Hope you enjoy it! - [Click here for Pathfinding Visualizer!](https://natedddd.github.io/Path_Finder_Animation/)
 
-<br>
+
 
 # What this Application Has:
 
@@ -16,7 +16,7 @@ Hope you enjoy it! - [Click here for Pathfinding Visualizer!](https://natedddd.g
 - **Greedy Best-first Search** - A more heusitic-heavy search similar to A*; does not guarantee the shorest path
 - **Recursive Search** - A blind search algorithm that exhaustively searchest down one path until there are no unvisited nodes, then doubles back to the last unvisited node and repeats the process. Does not guarantee the shortest path
 
-<br>
+
 
 ## What Else?
 
@@ -25,14 +25,14 @@ Hope you enjoy it! - [Click here for Pathfinding Visualizer!](https://natedddd.g
 - **Draggable Nodes** - Drag the Start, Finish, and Detour nodes to move them before animating, or to instantly see new paths after the first was visualized!
 - **Overlapped Shortest-Path** - When solving for the shortest path and a Detour node is involved, it is often fastest to double back along the same route. This will make sure you can visualize when that happens!
 
-<br>
+
 
 ## Acknowledgements
 
 This project was inspired by Clement Mihailescu's Pathfinding Visualizer project, which amazed me at the time and made me wonder how the algorithms, animations, and dynamic elements of the application all worked together. I got started with the help of his tutorial from YouTube linked [Here](https://www.youtube.com/watch?v=msttfIHHkak) 
 
 
-<br>
+
 <br>
 
 ---

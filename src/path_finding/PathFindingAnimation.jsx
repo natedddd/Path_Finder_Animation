@@ -74,7 +74,7 @@ export default class PathFindingAnimation extends Component {
     componentDidMount() {
         const grid = createInitialGrid();
         this.setState({grid});
-        displayIntroModal();
+        toggleIntroModal();
     }
 
     /**
@@ -560,6 +560,9 @@ export default class PathFindingAnimation extends Component {
         return newGrid;
     }
 
+    /**
+     * Handles displaying the next appropriate modal page
+     */
     handleDisplayNextModal() {
         const {currentModalPage} = this.state;
         displayNextModal(currentModalPage+1)
@@ -567,9 +570,12 @@ export default class PathFindingAnimation extends Component {
         this.setState({currentModalPage: currentModalPage+1})
     }
 
-    handleDisplayIntroModal() {
+    /**
+     * Handles adding the Introduction popup
+     */
+    handletoggleIntroModal() {
         this.setState({currentModalPage: 1});
-        displayIntroModal();
+        toggleIntroModal();
         displayNextModal(1)
     }
 
@@ -585,7 +591,7 @@ export default class PathFindingAnimation extends Component {
                 <nav className="header">
                     <div className="navbar">
                         <div className="title">
-                            <button className="modal-open-btn" onClick={() => this.handleDisplayIntroModal()}>
+                            <button className="modal-open-btn" onClick={() => this.handletoggleIntroModal()}>
                                 Pathfinding Visualizer
                             </button>
                         </div>
@@ -707,7 +713,7 @@ export default class PathFindingAnimation extends Component {
                     <div className="modal" id="intro-modal">
                         <div className="modal-header">
                             <div id="modal-title">Welcome to Pathfinding Visualizer!</div>
-                            <button className="modal-close-btn" onClick={() => this.handleDisplayIntroModal()}>&times;</button>
+                            <button className="modal-close-btn" onClick={() => this.handletoggleIntroModal()}>&times;</button>
                         </div>
                         <div className="modal-body">
                             <p className="subtitle" id="modal-subtitle">
@@ -723,7 +729,7 @@ export default class PathFindingAnimation extends Component {
                         </div>
                         <video src={draggingClip} id="modal-vid" width="0" height="0" autoPlay loop></video>
                         <div className="modal-footer">
-                            <button className="modal-nav-btn" id="modal-finish-btn" onClick={() => this.handleDisplayIntroModal()}>Show Me Paths!</button>
+                            <button className="modal-nav-btn" id="modal-finish-btn" onClick={() => this.handletoggleIntroModal()}>Show Me Paths!</button>
                             {/* <button className="modal-nav-btn" id="modal-next-btn" onClick={() => handleDisplayNextModal(2)}>Previous</button> */}
                             <p id="modal-progress">1/6</p>
                             <button className="modal-nav-btn" id="modal-next-btn" onClick={() => this.handleDisplayNextModal(2)}>Next, Please!</button>
@@ -771,7 +777,10 @@ export default class PathFindingAnimation extends Component {
     }
 }
 
-function displayIntroModal() {
+/**
+ * Toggles the IntroModal active state
+ */
+function toggleIntroModal() {
     const modal = document.querySelector('#intro-modal')
     const overlay = document.querySelector('#overlay')
     
@@ -779,6 +788,12 @@ function displayIntroModal() {
     overlay.classList.toggle('active')
 }
 
+/**
+ * Display's the next modal page with the appropriate
+ * page and text
+ * 
+ * @param {number} id The current modal page
+ */
 function displayNextModal(id) {
     const title = document.querySelector('#modal-title');
     const bodySubtitle = document.querySelector('#modal-subtitle');
@@ -872,13 +887,18 @@ function displayNextModal(id) {
             progressCount.textContent = "6/6";
             break;
         case 7:
-            displayIntroModal();
+            toggleIntroModal();
         default:
             console.log("Error in handleDisplayNextModal(). Invalid modal ID");
             break;
     }
 }
 
+/**
+ * Updates the algorithm description label after a new algorithm is selected
+ * 
+ * @param {String} algorithmName 
+ */
 function updateAlgorithmDescription(algorithmName) {
     const label = document.querySelector('#algorithmDescription')
     switch(algorithmName) {
@@ -957,9 +977,7 @@ const createInitialGrid = () => {
 const getNewGridWithWallToggled = (grid, row, col) => {
     // Cannot toggle wall on Start or Finish nodes
     if ( isStartFinishOrDetourNode(row, col) )  return grid
-    // console.log(
-    //     "row is: " + row + " and col is: " + col
-    // )
+
     const newGrid = grid.slice();
     const tempNode = grid[row][col];
     const newNode = {
