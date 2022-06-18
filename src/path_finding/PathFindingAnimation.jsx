@@ -21,7 +21,7 @@ import modalImg4 from './imgs/visualizeImg.png'
 import draggingClip from './imgs/draggingNodes.mp4'
 import draggingPath from './imgs/draggingPath.mp4'
 
-const DEV_MODE = false // used for ease of testing new features
+const DEV_MODE = false; // used for ease of testing new features
 
 const NUM_OF_GRID_ROWS = 25;
 const NUM_OF_GRID_COLS = 59;
@@ -332,6 +332,7 @@ export default class PathFindingAnimation extends Component {
      * node from the grid
      */
     handleDetourBtnClicked() {
+        if (!this.state.isReadyToAnimate) return;
         const {hasDetour, currentAlgo, isVisualized} = this.state;
         
         if (currentAlgo === "bi-dijkstra") return;
