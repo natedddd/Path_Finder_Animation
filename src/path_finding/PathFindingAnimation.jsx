@@ -21,6 +21,8 @@ import modalImg4 from './imgs/visualizeImg.png'
 import draggingClip from './imgs/draggingNodes.mp4'
 import draggingPath from './imgs/draggingPath.mp4'
 
+const DEV_MODE = false // used for ease of testing new features
+
 const NUM_OF_GRID_ROWS = 25;
 const NUM_OF_GRID_COLS = 59;
 
@@ -75,6 +77,8 @@ export default class PathFindingAnimation extends Component {
         const grid = createInitialGrid();
         this.setState({grid});
         toggleIntroModal();
+
+        if (DEV_MODE) toggleIntroModal();
     }
 
     /**
@@ -112,18 +116,22 @@ export default class PathFindingAnimation extends Component {
     handleMouseEnter(row, col) {
         if (!this.state.mouseIsPressed) return;
         
-        let {isMovingStart, isMovingFinish, isMovingDetour} = this.state;
+        let {grid,
+            isMovingStart, 
+            isMovingFinish, 
+            isMovingDetour,
+            isVisualized    
+        } = this.state;
         let newGrid;
         
         if (isMovingStart || isMovingFinish) {
-            newGrid = this.getNewGridWithMovingStartOrFinish(this.state.grid, row, col, isMovingStart);
-            if (this.state.isVisualized) this.visualizeAlgorithm();
+            newGrid = this.getNewGridWithMovingStartOrFinish(grid, row, col, isMovingStart);
         } else if (isMovingDetour) {
-            newGrid = this.getNewGridWithMovingDetour(this.state.grid, row, col);
-            if (this.state.isVisualized) this.visualizeAlgorithm();
+            newGrid = this.getNewGridWithMovingDetour(grid, row, col);
         } else {
-            newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+            newGrid = getNewGridWithWallToggled(grid, row, col);
         }
+        if (isVisualized) this.visualizeAlgorithm();
         this.setState({grid: newGrid});
     }
     
@@ -131,6 +139,7 @@ export default class PathFindingAnimation extends Component {
      * Resets necessary states to false
      */
     handleMouseUp() {
+        if (this.state.isVisualized) this.visualizeAlgorithm();
         this.setState({mouseIsPressed: false, isMovingStart: false, isMovingFinish:false, isMovingDetour: false})
     }
     
@@ -323,7 +332,7 @@ export default class PathFindingAnimation extends Component {
      * node from the grid
      */
     handleDetourBtnClicked() {
-        const {hasDetour, currentAlgo} = this.state;
+        const {hasDetour, currentAlgo, isVisualized} = this.state;
         
         if (currentAlgo === "bi-dijkstra") return;
 
@@ -332,6 +341,7 @@ export default class PathFindingAnimation extends Component {
         } else {
             this.handleAddDetour();
         }
+        if (isVisualized) this.visualizeAlgorithm();
     }
 
     /**
@@ -349,7 +359,8 @@ export default class PathFindingAnimation extends Component {
         node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "detour-node"
         document.querySelector('#detourBtn').textContent = `Remove Detour`;
-        this.setState({grid: grid, hasDetour: true})
+        this.setState({grid: grid})
+        this.state.hasDetour = true;
     }
 
     /**
@@ -361,7 +372,8 @@ export default class PathFindingAnimation extends Component {
         node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
         grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = ""
         document.querySelector('#detourBtn').textContent = `Add Detour`;
-        this.setState({grid: grid, hasDetour: false})
+        this.setState({grid: grid})
+        this.state.hasDetour = false;
     }
     
     /**
@@ -415,6 +427,7 @@ export default class PathFindingAnimation extends Component {
                 break;
         }
         updateAlgorithmDescription(algorithmName)
+
         // Add because there is no Detour feature for bi-directional Dijkstra
         if (algorithmName === "bi-dijkstra") {
             document.querySelector('#detourBtn').className = "button unavailable";
@@ -422,7 +435,7 @@ export default class PathFindingAnimation extends Component {
         } else {
             document.querySelector('#detourBtn').className = "button";
         }
-        this.setState({currentAlgo: algorithmName});
+        this.state.currentAlgo = algorithmName;
     }
 
     /**
@@ -954,6 +967,15 @@ const createNode = (row, col) => {
  * @returns {Object[][]<Node>}
  */
 const createInitialGrid = () => {
+    if (DEV_MODE) {
+        START_NODE_ROW = 12; 
+        START_NODE_COL = 10; 
+        FINISH_NODE_ROW = 12; 
+        FINISH_NODE_COL = 15; 
+        DETOUR_NODE_ROW = 9;
+        DETOUR_NODE_COL = 13;
+    }
+
     const grid = [];
     for (let row = 0; row < NUM_OF_GRID_ROWS; row++) {
         const currentRow = [];
@@ -1065,9 +1087,7 @@ function updateStartNodePosition(grid, row, col) {
  * @returns {Object[][]<Node>} The new grid state
  */
 function updateFinishNodePosition(grid, row, col) {
-    let node = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-    node.nodeType = "";
-    grid[FINISH_NODE_ROW][FINISH_NODE_COL] = node;
+    grid[FINISH_NODE_ROW][FINISH_NODE_COL].nodeType = "";
     FINISH_NODE_ROW = row;
     FINISH_NODE_COL = col;
     return grid;
@@ -1082,9 +1102,7 @@ function updateFinishNodePosition(grid, row, col) {
  * @returns {Object[][]<Node>} The new grid state
  */
 function updateDetourNodePosition(grid, row, col) {
-    let node = grid[DETOUR_NODE_ROW][DETOUR_NODE_COL];
-    node.nodeType = "";
-    grid[DETOUR_NODE_ROW][DETOUR_NODE_COL] = node;
+    grid[DETOUR_NODE_ROW][DETOUR_NODE_COL].nodeType = "";
     DETOUR_NODE_ROW = row;
     DETOUR_NODE_COL = col;
     return grid;
