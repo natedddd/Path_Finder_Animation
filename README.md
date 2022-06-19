@@ -4,15 +4,8 @@ I built this Pathfinding Visualizer because I was amazed at how cool it was to c
 
 Hope you enjoy it! - [Click here for Pathfinding Visualizer!](https://natedddd.github.io/Path_Finder_Animation/)
 
-<<<<<<< HEAD
-
 https://user-images.githubusercontent.com/88454639/174502424-4acb60df-0a97-4edc-9807-a85b413aa992.mp4
 
-
-
-=======
-![](src/path_finding/imgs/demo.mp4)
->>>>>>> 439187b (Add patch for weird screen rendering.)
 
 # What this Application Has:
 
