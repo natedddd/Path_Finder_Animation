@@ -4,11 +4,15 @@ I built this Pathfinding Visualizer because I was amazed at how cool it was to c
 
 Hope you enjoy it! - [Click here for Pathfinding Visualizer!](https://natedddd.github.io/Path_Finder_Animation/)
 
+<<<<<<< HEAD
 
 https://user-images.githubusercontent.com/88454639/174502424-4acb60df-0a97-4edc-9807-a85b413aa992.mp4
 
 
 
+=======
+![](src/path_finding/imgs/demo.mp4)
+>>>>>>> 439187b (Add patch for weird screen rendering.)
 
 # What this Application Has:
 
@@ -30,12 +34,11 @@ https://user-images.githubusercontent.com/88454639/174502424-4acb60df-0a97-4edc-
 - **Overlapped Shortest-Path** - When solving for the shortest path and a Detour node is involved, it is often fastest to double back along the same route. This will make sure you can visualize when that happens!
 
 
-
 ## Acknowledgements
 
 This project was inspired by Clement Mihailescu's Pathfinding Visualizer project, which amazed me at the time and made me wonder how the algorithms, animations, and dynamic elements of the application all worked together. I got started with the help of his tutorial from YouTube linked [Here](https://www.youtube.com/watch?v=msttfIHHkak) 
 
-
+Last updated: 6/19/22
 
 <br>
 

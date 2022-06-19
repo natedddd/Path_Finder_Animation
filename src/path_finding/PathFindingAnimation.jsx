@@ -744,7 +744,6 @@ export default class PathFindingAnimation extends Component {
                         <video src={draggingClip} id="modal-vid" width="0" height="0" autoPlay loop></video>
                         <div className="modal-footer">
                             <button className="modal-nav-btn" id="modal-finish-btn" onClick={() => this.handletoggleIntroModal()}>Show Me Paths!</button>
-                            {/* <button className="modal-nav-btn" id="modal-next-btn" onClick={() => handleDisplayNextModal(2)}>Previous</button> */}
                             <p id="modal-progress">1/6</p>
                             <button className="modal-nav-btn" id="modal-next-btn" onClick={() => this.handleDisplayNextModal(2)}>Next, Please!</button>
                         </div>

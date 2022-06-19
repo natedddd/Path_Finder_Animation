@@ -370,6 +370,6 @@ span {
 /**** Grid styles ****/
 .grid {
     position: absolute;
-    margin: 0vw 8.5vw;
+    margin-left: 8.5vw;
     z-index: -1;
 }
